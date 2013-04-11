@@ -30,14 +30,14 @@ namespace tumbo
                 { *this = l; }
 
 			template<class container>
-			matrix( const container& data )
-				{ *this = data;	}
+			matrix( const container& new_data )
+				{ *this = new_data;	}
 
 			template<class container> matrix&
-			operator = ( const container& data )
+			operator = ( const container& new_data )
 				{
-				auto it = std::begin(data);
-				auto end = std::end(data);
+				auto it = std::begin(new_data);
+				auto end = std::end(new_data);
 				assert( size() == std::distance(it,end) );
 				size_t i=0;
 				while( it != end )
@@ -50,39 +50,39 @@ namespace tumbo
 
 			scalar_t&
             operator() ( size_t i, size_t j )
-				{ return data[ j + i*N ]; }
+				{ return data_[ j + i*N ]; }
 
 			const scalar_t&
             operator() ( size_t i, size_t j ) const
-				{ return data[ j + i*N ]; }
+				{ return data_[ j + i*N ]; }
 
 			scalar_t&
             operator[] ( size_t i )
-				{ return data[i]; }
+				{ return data_[i]; }
 
 			const scalar_t&
             operator[] ( size_t i ) const
-				{ return data[i]; }
+				{ return data_[i]; }
 
 			const scalar_t*
             data() const
-				{ return data; }
+				{ return data_; }
 
 			scalar_t*
             begin()
-                { return data; }
+                { return data_; }
 
 			const scalar_t*
             begin() const
-                { return data; }
+                { return data_; }
 
 			scalar_t*
             end()
-                { return data+M*N; }
+                { return data_+M*N; }
 
 			const scalar_t*
             end() const
-                { return data+M*N; }
+                { return data_+M*N; }
 
 			static size_t
             size()
@@ -101,7 +101,7 @@ namespace tumbo
 				{ return M == 1 || N == 1; }
 
 		private:
-			scalar_t data[ M*N ];
+			scalar_t data_[ M*N ];
 		};
 
 

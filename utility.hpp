@@ -3,6 +3,7 @@
 
 #include "matrix.hpp"
 
+#undef minor
 
 namespace tumbo
 	{
