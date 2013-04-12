@@ -354,9 +354,9 @@ namespace tumbo
 	translation( T x, T y, T z )
 		{
 		auto result = matrix<T,4U,4U>::identity();
-		result(3,0) = x;
-		result(3,1) = y;
-		result(3,2) = z;
+		result(0,3) = x;
+		result(1,3) = y;
+		result(2,3) = z;
 		return result;
 		}
 
@@ -364,8 +364,8 @@ namespace tumbo
 	translation( T x, T y )
 		{
 		auto result = matrix<T,3,3>::identity();
-		result(0,2) = x;
-		result(1,2) = y;
+		result(2,0) = x;
+		result(2,1) = y;
 		return result;
 		}
 
