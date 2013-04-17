@@ -125,7 +125,7 @@ namespace tumbo
 		{
 		auto it = std::begin(vec);
 		auto end = std::end(vec);
-		assert( N == std::distance(it,end) );
+		assert( N >= std::distance(it,end) );
 		size_t j = 0;
 		while( it != end )
 			{
@@ -141,7 +141,7 @@ namespace tumbo
 		{
 		auto it = std::begin(vec);
 		auto end = std::end(vec);
-		assert( M == std::distance(it,end) );
+		assert( M >= std::distance(it,end) );
 		size_t i = 0;
 		while( it != end )
 			{
@@ -150,6 +150,37 @@ namespace tumbo
 			}
 		return A;
 		}
+
+
+    /* Combines two matrices of equal height into a large matrix. */
+    template< class T, size_t M, size_t N0, size_t N1 > matrix<T,M,N0+N1>
+    weld( const matrix<T,M,N0>& A, const matrix<T,M,N1>& B )
+        {
+        matrix<T,M,N0+N1> result;
+        for( size_t i=0; i < M; ++i )
+            {
+            for( size_t j=0; j < N0; ++j )
+                result(i,j) = A(i,j);
+            for( size_t j=0; j < N1; ++j )
+                result(i,N0+j) = B(i,j);
+            }
+        return result;
+        }
+
+
+    /* Combines two matrices of equal width into a larger matrix. */
+    template< class T, size_t M0, size_t M1, size_t N > matrix<T,M0+M1,N>
+    weldv( const matrix<T,M0,N>& A, const matrix<T,M1,N>& B )
+        {
+        matrix<T,M0+M1,N> result;
+        for( size_t j=0; j < N; ++j )
+            {
+            for( size_t i=0; i < M0; ++i )
+                result(i,j) = A(i,j);
+            for( size_t i=0; i < M1; ++i )
+                result(i,M0+j) = B(i,j);
+            }
+        }
 
 
 	template< class T, size_t M, size_t N, size_t P > matrix<T,M,P>
