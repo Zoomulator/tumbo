@@ -6,6 +6,10 @@
 
 namespace tumbo
     {
+    template<typename T> using vec2 = matrix<T,2,1>;
+    template<typename T> using vec3 = matrix<T,3,1>;
+    template<typename T> using vec4 = matrix<T,4,1>;
+
     typedef matrix<int, 2, 1> ivec2;
     typedef matrix<int, 3, 1> ivec3;
     typedef matrix<int, 4, 1> ivec4;
