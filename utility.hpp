@@ -2,13 +2,27 @@
 #define TUMBO_UTILITY_HPP
 
 #include "matrix.hpp"
+#include "assert.hpp"
 
 #undef minor
 
 namespace tumbo
 	{
 
+    /// Cast a matrix to another equal sized matrix with different inner type.
+    template<class S, class T, size_t M, size_t N> matrix<S,M,N>
+    cast_matrix( const matrix<T,M,N>& A )
+        {
+        matrix<S,M,N> R;
 
+        for( size_t i=0; i < A.size(); ++i )
+            R[i] = static_cast<S>( A[i] );
+
+        return R;
+        }
+
+
+    /// Returns a copy of the matrix transposed.
 	template< class T, size_t M, size_t N > matrix<T,N,M>
 	transpose( const matrix<T,M,N>& A )
 		{
@@ -22,6 +36,7 @@ namespace tumbo
 		}
 
 
+    /// Multiply matrix by scalar.
 	template< class T, size_t M, size_t N> matrix<T,M,N>
 	operator* ( T s, const matrix<T,M,N>& A )
 		{
@@ -32,6 +47,7 @@ namespace tumbo
 		}
 
 
+    /// Matrix division by scalar.
 	template< class T, size_t M, size_t N> matrix<T,M,N>
 	operator/ (const matrix<T,M,N>& A, T s )
 		{
@@ -42,6 +58,7 @@ namespace tumbo
 		}
 
 
+    /// Element-wise negation of matrix.
 	template< class T, size_t M, size_t N> matrix<T,M,N>
 	operator- ( const matrix<T,M,N>& A )
 		{
@@ -53,11 +70,14 @@ namespace tumbo
 		}
 
 
+    /// Dot product between two equal length vector matrices.
 	template< class T, size_t AM, size_t AN, size_t BM, size_t BN > T
 	dot( const matrix<T,AM,AN>& A, const matrix<T,BM,BN>& B )
 		{
-		static_assert( (AM == 1 || AN == 1) && (BM == 1 || BN == 1), "Input must be vector" );
-		static_assert( AM*AN == BM*BN, "Vectors must be equal in size" );
+		static_assert( (AM == 1 || AN == 1) && (BM == 1 || BN == 1),
+            "Input must be vectors." );
+		static_assert( AM*AN == BM*BN,
+            "Vectors must be equal in length." );
 
 		T sum = 0;
 		for( size_t i=0; i < A.size(); ++i )
@@ -67,6 +87,12 @@ namespace tumbo
 		}
 
 
+    /// Returns the squared length of a vector matrix.
+    /**
+        Many comparisons and equations require the square length of a vector.
+        This function lets you avoid the indirect use of sqrt when using
+        the standard length function.
+    */
 	template< class T, size_t M, size_t N > T
 	length_sq( const matrix<T,M,N>& A )
 		{
@@ -80,6 +106,7 @@ namespace tumbo
         }
 
 
+    /// Returns the length, or magnitude, of a vector. Uses sqrt
     template< class T, size_t M, size_t N > T
     length( const matrix<T,M,N>& A )
         {
@@ -87,6 +114,7 @@ namespace tumbo
 		}
 
 
+    /// Returns a copy of row i of matrix A as a vector matrix.
 	template< class T, size_t M, size_t N > matrix<T,1,N>
 	row( const matrix<T,M,N>& A, size_t i )
 		{
@@ -97,6 +125,7 @@ namespace tumbo
 		}
 
 
+    /// Returns a copy of column j of matrix A as a vector matrix.
 	template< class T, size_t M, size_t N > matrix<T,M,1>
 	column( const matrix<T,M,N>& A, size_t j )
 		{
@@ -107,7 +136,14 @@ namespace tumbo
 		}
 
 
-	template< size_t RM, size_t RN, class T, size_t AM, size_t AN > matrix<T,RM,RN>
+    /// Returns a copy of the specified submatrix in A.
+    /** Usage: The size of the new matrix is specified as template arguments.
+        The coordinates gives the top left element in A that will be the first
+        element of the submatrix.
+        sumatrix<H,W>( A, y, x )
+    */
+	template< size_t RM, size_t RN, class T, size_t AM, size_t AN >
+    matrix<T,RM,RN>
 	submatrix( const matrix<T,AM,AN>& A, size_t oi, size_t oj )
 		{
 		matrix<T,RM,RN> R;
@@ -120,12 +156,18 @@ namespace tumbo
 		}
 
 
+    /// Mutates the matrix A at row i to contain the given data.
+    /** The data may be any iterable type, including sized c-arrays and
+        initializer lists. It may contain less elements than the width of
+        the row, in which case it fills the row with the given elements and
+        leaves the remaining row elements unchanged.
+    */
 	template<class T, size_t M, size_t N, class container> matrix<T,M,N>&
 	assign_row( matrix<T,M,N>& A, size_t i, const container& vec)
 		{
 		auto it = std::begin(vec);
 		auto end = std::end(vec);
-		assert( N >= std::distance(it,end) );
+		TUMBO_ASSERT( N >= std::distance(it,end) );
 		size_t j = 0;
 		while( it != end )
 			{
@@ -136,12 +178,14 @@ namespace tumbo
 		}
 
 
+    // Mutates the matrix A at column j to contain the given data.
+    /** Refer to assign_row for details. */
 	template<class T, size_t M, size_t N, class container> matrix<T,M,N>&
 	assign_column( matrix<T,M,N>& A, size_t j, const container& vec)
 		{
 		auto it = std::begin(vec);
 		auto end = std::end(vec);
-		assert( M >= std::distance(it,end) );
+		TUMBO_ASSERT( M >= std::distance(it,end) );
 		size_t i = 0;
 		while( it != end )
 			{
@@ -152,7 +196,7 @@ namespace tumbo
 		}
 
 
-    /* Combines two matrices of equal height into a large matrix. */
+    /// Combines two matrices of equal height into a larger matrix.
     template< class T, size_t M, size_t N0, size_t N1 > matrix<T,M,N0+N1>
     weld( const matrix<T,M,N0>& A, const matrix<T,M,N1>& B )
         {
@@ -168,7 +212,7 @@ namespace tumbo
         }
 
 
-    /* Combines two matrices of equal width into a larger matrix. */
+    /// Combines two matrices of equal width into a larger matrix.
     template< class T, size_t M0, size_t M1, size_t N > matrix<T,M0+M1,N>
     weldv( const matrix<T,M0,N>& A, const matrix<T,M1,N>& B )
         {
@@ -183,11 +227,11 @@ namespace tumbo
         }
 
 
+    /// Multiplication operator between two matrices.
+    /** Matrix B must have the same height as A's width. */
 	template< class T, size_t M, size_t N, size_t P > matrix<T,M,P>
 	operator * ( const matrix<T,M,N>& A, const matrix<T,N,P>& B )
 		{
-		//static_assert( AN == BM, "matrix multiplication can only be done with a M x N and N x O matrices." );
-
 		matrix<T,M,P> R;
 
 		for( size_t i=0; i<M; ++i )
@@ -198,6 +242,7 @@ namespace tumbo
 		}
 
 
+    /// Element-wise comparison between two matrices.
 	template< class T, size_t M, size_t N > bool
 	operator == ( const matrix<T,M,N>& A, const matrix<T,M,N>& B )
 		{
@@ -208,6 +253,7 @@ namespace tumbo
 		}
 
 
+    /// Element-wise addition of matrices.
 	template< class T, size_t M, size_t N > matrix<T,M,N>
 	operator + ( const matrix<T,M,N>& A, const matrix<T,M,N>& B )
 		{
@@ -219,6 +265,7 @@ namespace tumbo
 		}
 
 
+    /// Element-wise subtraction of matrices.
 	template< class T, size_t M, size_t N > matrix<T,M,N>
 	operator - ( const matrix<T,M,N>& A, const matrix<T,M,N>& B )
 		{
@@ -230,7 +277,7 @@ namespace tumbo
 		}
 
 
-	// Generates a new matrix where a row and column is removed.
+	/// Generates a new matrix where a row and column is removed.
 	template< class T, size_t M, size_t N > matrix<T, M-1, N-1>
 	cross_out( const matrix<T,M,N>& A, size_t r, size_t c )
 		{
@@ -302,6 +349,7 @@ namespace tumbo
 		}
 
 
+    /// Returns the matrix minor.
 	template< class T, size_t M, size_t N > matrix<T,M,N>
 	minor( const matrix<T,M,N>& A )
 		{
@@ -321,7 +369,8 @@ namespace tumbo
 		matrix<T,M,N> result = minor(A);
 		for( size_t i = 0; i < M; ++i )
 		for( size_t j = 0; j < N; ++j )
-			result(i,j) = result(i,j) * ((i+j)%2 ? -1.0f : 1.0f ); // Flip signs every other element
+            // Flip signs every other element
+			result(i,j) = result(i,j) * ((i+j)%2 ? -1.0f : 1.0f );
 
 		return result;
 		}
@@ -357,99 +406,7 @@ namespace tumbo
 		}
 
 
-	// Constructor for Identity matrix.
-	template< class T, size_t M, size_t N > matrix<T,M,N>
-	matrix<T,M,N>::identity()
-		{
-		matrix<T,M,N> A;
-		for( size_t i=0; i<M*N; ++i )
-			A[i] = static_cast<T>(i % (N+1) == 0 ? 1 : 0);
-
-		return A;
-		}
-
-
-	// Constructor for a uniform matrix. All elements will have the given value
-	template< class T, size_t M, size_t N > matrix<T,M,N>
-	matrix<T,M,N>::uniform(typename matrix<T,M,N>::scalar_t s)
-		{
-		matrix<T,M,N> A;
-		for( size_t i=0; i<M*N; ++i )
-			A[i] = s;
-		return A;
-		}
-
-
-	// Constructor for translation matrix.
-	template<class T> matrix<T,4,4>
-	translation( T x, T y, T z )
-		{
-		auto result = matrix<T,4U,4U>::identity();
-		result(0,3) = x;
-		result(1,3) = y;
-		result(2,3) = z;
-		return result;
-		}
-
-	template<class T> matrix<T,3,3>
-	translation( T x, T y )
-		{
-		auto result = matrix<T,3,3>::identity();
-		result(2,0) = x;
-		result(2,1) = y;
-		return result;
-		}
-
-
-	// Contructor for rotation matrix.
-	template<class T> matrix<T,4,4>
-	rotation( T rad, T x, T y, T z )
-		{
-		T mag = T( sqrt( x*x + y*y + z*z ) );
-		if( mag == 0.0f )
-			return matrix<T,4,4>::identity();
-
-		x /= mag; y /= mag; z /= mag;
-
-		T s = sin(rad);
-		T c = cos(rad);
-		T one_c = 1.0f - c;
-
-		const T data[16] =
-			{
-			(one_c *x*x) + c,	(one_c *x*y) + z*s, (one_c *z*x) - y*s,		0,
-			(one_c *x*y) - z*s,	(one_c *y*y) + c,	(one_c *y*z) + x*s,		0,
-			(one_c *z*x) + y*s,	(one_c *y*z) -x*s,	(one_c *z*z) + c,		0,
-			0,					0,					0,						1 };
-
-		matrix<T,4,4> R;
-		R = data;
-		return R;
-		}
-
-	template<class T> matrix<T,3,3>
-	rotation( T rad )
-		{
-		matrix<T,3,3> R = matrix<T,3,3>::identity();
-		R(0,0) = cos(rad);
-		R(1,0) = sin(rad);
-		R(0,1) = -R(1,0);
-		R(1,1) = R(0,0);
-		return R;
-		}
-
-	template<class T> matrix<T,3,3>
-	scaling( T x, T y )
-		{
-		matrix<T,3,3> R = matrix<T,3,3>::identity();
-		R(0,0) = x;
-		R(1,1) = y;
-		return R;
-		}
-
-
-
-	// Maps a function over a matrix. Returns the resulting matrix
+	/// Maps a function over a matrix. Returns the resulting matrix
 	template<class T, size_t M, size_t N, class FuncT> matrix<T,M,N>
 	mapf( const matrix<T,M,N>& A, FuncT fun )
 		{

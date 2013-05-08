@@ -3,12 +3,17 @@
 
 #include "matrix.hpp"
 #include "utility.hpp"
+#include "cons.hpp"
 
 namespace tumbo
     {
     template<typename T> using vec2 = matrix<T,2,1>;
     template<typename T> using vec3 = matrix<T,3,1>;
     template<typename T> using vec4 = matrix<T,4,1>;
+
+    template<typename T> using mat22 = matrix<T,2,2>;
+    template<typename T> using mat33 = matrix<T,3,3>;
+    template<typename T> using mat44 = matrix<T,4,4>;
 
     typedef matrix<int, 2, 1> ivec2;
     typedef matrix<int, 3, 1> ivec3;
