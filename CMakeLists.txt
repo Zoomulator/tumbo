@@ -5,6 +5,7 @@ set( TUMBO_HEADERS
     assert.hpp
     cons.hpp
     io.hpp
+    lua_binding.hpp
     matrix.hpp
     tumbo.hpp
     utility.hpp )

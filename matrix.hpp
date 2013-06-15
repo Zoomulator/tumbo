@@ -34,6 +34,12 @@ namespace tumbo
 			template<class container>
 			matrix( const container& new_data );
 
+            template<class Iter>
+            matrix( Iter first, Iter end );
+
+            template<class Iter> matrix&
+            assign( Iter first, Iter end );
+
 			template<class container> matrix&
 			operator = ( const container& new_data );
 
@@ -111,12 +117,21 @@ namespace tumbo
         }
 
 
+    template< class T, size_t M, size_t N>
+    template<class Iter>
+    matrix<T,M,N>::matrix( Iter it, Iter end )
+        {
+        assign(it,end);
+        }
+
+
     template < class T, size_t M, size_t N >
     template<class container>
     matrix<T,M,N>::matrix( const container& new_data )
         {
         *this = new_data;
         }
+
 
 
     template < class T, size_t M, size_t N >
@@ -126,6 +141,15 @@ namespace tumbo
         {
         auto it = std::begin(new_data);
         auto end = std::end(new_data);
+        return assign(it,end);
+        }
+
+
+    template < class T, size_t M, size_t N >
+    template<class Iter>
+    matrix<T,M,N>&
+    matrix<T,M,N>::assign ( Iter it, Iter end )
+        {
         assert( size() == std::distance(it,end) );
         size_t i=0;
         while( it != end )
