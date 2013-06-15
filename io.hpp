@@ -11,14 +11,17 @@ namespace tumbo
     template < typename T, size_t M, size_t N > std::ostream&
     operator << ( std::ostream& os, const matrix<T,M,N>& A )
         {
+        auto const delim = ',';
         for( size_t i=0; i<M; ++i )
             {
             os << '[';
-            char delim = '\0';
+            bool first = true;
             for( size_t j=0; j<N; ++j )
                 {
-                os << delim << A(i,j);
-                delim = ',';
+                if(!first)
+                    os << delim;
+                os << A(i,j);
+                first = false;
                 }
             os << ']';
             }

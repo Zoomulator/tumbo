@@ -18,20 +18,52 @@ namespace tumbo
     {
 namespace lua
     {
-    using namespace tumbo;
+    template<class T>
+    struct bind
+        {
+        static const char* NAME;
 
-    std::map<std::type_index, std::string> binding_names;
+        static T*
+        lua_cast( lua_State* L, int index );
 
+        static T*
+        push( lua_State* L );
+
+        static int
+        create( lua_State* L );
+
+        static int
+        add( lua_State* L );
+
+        static int
+        unary_minus( lua_State* L );
+
+        static int
+        sub( lua_State* L );
+
+        static int
+        mat_index( lua_State* L );
+
+        static int
+        mat_call( lua_State* L );
+
+        static int
+        tostr( lua_State* L );
+
+        static void
+        reg( lua_State* L, const char* name );
+        };
+
+    template<class T> const char* bind<T>::NAME = "undef";
 
     // Attempts to cast userdata to the given type.
     // Returns a pointer to the userdata with the correct type. null on failure
     template<class T> T*
-    lua_cast( lua_State* L, int index )
+    bind<T>::lua_cast( lua_State* L, int index )
         {
         T* ptr = nullptr;
-        auto tname = binding_names[ std::type_index(typeid(T)) ];
         lua_getmetatable( L, index );
-        lua_getfield( L, LUA_REGISTRYINDEX, tname.c_str() );
+        lua_getfield( L, LUA_REGISTRYINDEX, NAME );
         if( lua_rawequal( L, -1, -2 ) )
             ptr = static_cast<T*>( lua_touserdata( L, index ) );
 
@@ -42,24 +74,23 @@ namespace lua
 
     /* Pushes the registered type T onto the lua stack. Does not initialize. */
     template<class T> T*
-    push( lua_State* L )
+    bind<T>::push( lua_State* L )
         {
         void* userdata = lua_newuserdata( L, sizeof(T) );
-        auto name = binding_names[ std::type_index(typeid(T)) ];
-        luaL_setmetatable( L, name.c_str() );
+        luaL_setmetatable( L, NAME );
         return static_cast<T*>(userdata);
         }
 
 
     /* Lua constructor for matrix T. */
     template<class T> int
-    create( lua_State* L )
+    bind<T>::create( lua_State* L )
         {
         int argc = lua_gettop(L);
         /* Default construct. */
         if( argc == 0 )
             {
-            new (push<T>(L)) T();
+            new (push(L)) T();
             return 1;
             }
         /* Must provide all elements of the matrix. */
@@ -70,7 +101,7 @@ namespace lua
                 data[i-1] = static_cast<typename T::scalar_t>(
                     luaL_checknumber( L, i ) );
 
-            new (push<T>(L)) T(data, data+T::size());
+            new (push(L)) T(data, data+T::size());
             return 1;
             }
         return luaL_error(L, "Bad argument count for constructor." );
@@ -78,53 +109,50 @@ namespace lua
 
 
     template<class T> int
-    add( lua_State* L )
+    bind<T>::add( lua_State* L )
         {
         int n = lua_gettop( L ); // passed arguments
         if( n != 2 )
             luaL_error(L, "bad argument count");
 
-        auto name = binding_names[ std::type_index(typeid(T)) ];
-        T* a = static_cast<T*>( luaL_checkudata(L, 1, name.c_str()) );
-        T* b = static_cast<T*>( luaL_checkudata(L, 2, name.c_str()) );
+        T* a = static_cast<T*>( luaL_checkudata(L, 1, NAME) );
+        T* b = static_cast<T*>( luaL_checkudata(L, 2, NAME) );
         if( a == nullptr || b == nullptr )
             luaL_error(L, "bad argument types");
 
-        *push<T>(L) = *a + *b;
+        *push(L) = *a + *b;
         return 1;
         }
 
 
     template<class T> int
-    unary_minus( lua_State* L )
+    bind<T>::unary_minus( lua_State* L )
         {
         int n = lua_gettop( L );
         if( n != 1 )
             luaL_error(L, "bad argument count");
 
-        auto name = binding_names[ std::type_index(typeid(T)) ];
-        T* a = static_cast<T*>( luaL_checkudata(L, 1, name.c_str()) );
+        T* a = static_cast<T*>( luaL_checkudata(L, 1, NAME) );
         if( a == nullptr )
             luaL_error(L, "bad argument types");
 
-        *push<T>(L) = - (*a);
+        *push(L) = - (*a);
         return 1;
         }
 
 
     template<class T> int
-    sub( lua_State* L )
+    bind<T>::sub( lua_State* L )
         {
         int n = lua_gettop( L ); // passed arguments
         if( n != 2 )
             luaL_error(L, "bad argument count");
-        auto name = binding_names[ std::type_index(typeid(T)) ];
-        T* a = static_cast<T*>( luaL_checkudata(L, 1, name.c_str()) );
-        T* b = static_cast<T*>( luaL_checkudata(L, 2, name.c_str()) );
+        T* a = static_cast<T*>( luaL_checkudata(L, 1, NAME) );
+        T* b = static_cast<T*>( luaL_checkudata(L, 2, NAME) );
         if( a == nullptr || b == nullptr )
             luaL_error(L, "bad argument types");
 
-        *push<T>(L) = *a - *b;
+        *push(L) = *a - *b;
         return 1;
         }
 
@@ -137,20 +165,20 @@ namespace lua
             luaL_error(L, "bad argument count");
 
         fmat44* a = static_cast<fmat44*>( luaL_checkudata(L, 1, "mat44" ) );
-        fvec4* b_v = lua_cast<fvec4>(L,2);
-        fmat44* b_m = lua_cast<fmat44>(L,2);
+        fvec4* b_v = bind<fvec4>::lua_cast(L,2);
+        fmat44* b_m = bind<fmat44>::lua_cast(L,2);
 
         if( a == nullptr || (b_v == nullptr && b_m == nullptr) )
             luaL_error(L, "bad argument types");
 
         if( b_v )
             {
-            *push<fvec4>(L) = (*a) * (*b_v);
+            *bind<fvec4>::push(L) = (*a) * (*b_v);
             return 1;
             }
         else if( b_m )
             {
-            *push<fmat44>(L) = (*a) * (*b_m);
+            *bind<fmat44>::push(L) = (*a) * (*b_m);
             return 1;
             }
         return 0;
@@ -158,10 +186,10 @@ namespace lua
 
 
     template<class T> int
-    mat_index( lua_State* L )
+    bind<T>::mat_index( lua_State* L )
         {
         int isnum = 0;
-        T* A = lua_cast<T>(L,1);
+        T* A = lua_cast(L,1);
         int i = lua_tointegerx(L,2,&isnum);
         if( isnum == 0 )
             return luaL_error(L,"Invalid index type.");
@@ -175,11 +203,11 @@ namespace lua
 
 
     template<class T> int
-    mat_call( lua_State* L )
+    bind<T>::mat_call( lua_State* L )
         {
         if( lua_gettop(L) != 2 )
             return luaL_error(L,"Matrix type table access takes two integers");
-        T* A = lua_cast<T>(L,1);
+        T* A = lua_cast(L,1);
         int i_num=0,j_num=0;
         int i = lua_tointegerx(L,1,&i_num);
         int j = lua_tointegerx(L,2,&j_num);
@@ -195,10 +223,9 @@ namespace lua
 
 
     template<class T> int
-    tostr( lua_State* L )
+    bind<T>::tostr( lua_State* L )
         {
-        auto name = binding_names[ std::type_index(typeid(T)) ];
-        T* v = static_cast<T*>( luaL_checkudata( L, 1, name.c_str() ) );
+        auto v = static_cast<T*>( luaL_checkudata(L, 1, NAME) );
         std::stringstream ss;
         ss << *v;
         std::string str = ss.str();
@@ -208,36 +235,37 @@ namespace lua
 
 
     template<class T> void
-    reg( lua_State* L, const std::string& name )
+    bind<T>::reg( lua_State* L, const char* name )
         {
-        binding_names[ std::type_index(typeid(T)) ] = name;
+        NAME = name;
 
         //int methods, metatable;
 
         luaL_Reg meta[] =
             {
-            { "__add", add<T> },
-            { "__unm", unary_minus<T> },
-            { "__sub", sub<T> },
+            { "__add", add },
+            { "__unm", unary_minus },
+            { "__sub", sub },
             { "__mul", mul },
-            { "__index", mat_index<T> },
-            { "__call", mat_call<T> },
-            { "__tostring", tostr<T> },
-            { 0, 0 }
+            { "__index", mat_index },
+            { "__call", mat_call },
+            { "__tostring", tostr },
+            { NULL, NULL }
             };
         luaL_Reg meth[] =
             {
-            { "create", create<T> },
+            { "create", create },
             { NULL, NULL }
             };
         // Put a new table on the stack and retrieve its index.
-        luaL_newmetatable( L, name.c_str() );
+        luaL_newmetatable( L, NAME );
         //metatable = lua_gettop( L );
         luaL_setfuncs( L, meta, 0 );
 
         lua_newtable( L );
         luaL_setfuncs( L, meth, 0 );
-        lua_setglobal( L, name.c_str() );
+        lua_setglobal( L, NAME );
+        lua_pop(L,1); // Remove the metatable.
         }
 
 
