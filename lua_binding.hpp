@@ -18,6 +18,36 @@ namespace tumbo
     {
 namespace lua
     {
+
+    /* Check that the lua stack is of the correct size upon leaving
+        the function. */
+    class stackassert
+        {
+        public:
+            stackassert( lua_State* L, int sizechange) :
+                L(L)
+                {
+                stacksize = lua_gettop(L) + sizechange;
+                }
+
+            ~stackassert()
+                {
+                assert( lua_gettop(L) == stacksize );
+                }
+
+        private:
+            lua_State* L;
+            int stacksize;
+        };
+
+    #ifndef NDEBUG
+    #define TUMBO_LUA_STACKASSERT( L, sizechange )\
+        stackassert stackguard((L), (sizechange));
+    #else
+    #define TUMBO_LUA_STACKASSERT( L, sizechange )
+    #endif
+
+
     template<class T>
     struct bind
         {
@@ -25,6 +55,9 @@ namespace lua
 
         static T*
         lua_cast( lua_State* L, int index );
+
+        static T*
+        lua_check( lua_State* L, int index );
 
         static T*
         push( lua_State* L );
@@ -45,6 +78,9 @@ namespace lua
         mat_index( lua_State* L );
 
         static int
+        mat_assign_index( lua_State* L );
+
+        static int
         mat_call( lua_State* L );
 
         static int
@@ -61,6 +97,7 @@ namespace lua
     template<class T> T*
     bind<T>::lua_cast( lua_State* L, int index )
         {
+        TUMBO_LUA_STACKASSERT(L,0);
         T* ptr = nullptr;
         lua_getmetatable( L, index );
         lua_getfield( L, LUA_REGISTRYINDEX, NAME );
@@ -72,10 +109,28 @@ namespace lua
         }
 
 
+    template<class T> T*
+    bind<T>::lua_check( lua_State* L, int index )
+        {
+        TUMBO_LUA_STACKASSERT(L,0);
+        auto ptr = lua_cast(L,index);
+        if( ptr )
+            return ptr;
+        else
+            {
+            luaL_error(L,
+                "Bad type for argument %d: Type %s required",
+                index, NAME );
+            return nullptr;
+            }
+        }
+
+
     /* Pushes the registered type T onto the lua stack. Does not initialize. */
     template<class T> T*
     bind<T>::push( lua_State* L )
         {
+        TUMBO_LUA_STACKASSERT(L,1);
         void* userdata = lua_newuserdata( L, sizeof(T) );
         luaL_setmetatable( L, NAME );
         return static_cast<T*>(userdata);
@@ -189,10 +244,21 @@ namespace lua
     bind<T>::mat_index( lua_State* L )
         {
         int isnum = 0;
-        T* A = lua_cast(L,1);
+        auto A = lua_check(L,1);
         int i = lua_tointegerx(L,2,&isnum);
         if( isnum == 0 )
-            return luaL_error(L,"Invalid index type.");
+            {
+            /* Get methods table. */
+            lua_getmetatable(L,1);
+            lua_pushstring(L, "methods");
+            lua_rawget(L,-2);
+            /* copy the index value. */
+            lua_pushvalue(L,2);
+            /* Get the value in the methods table. */
+            lua_gettable(L,-2);
+            return 1;
+            //return luaL_error(L,"Invalid index type.");
+            }
         if( i < (int)T::size() )
             {
             lua_pushnumber( L, (*A)[i] );
@@ -203,14 +269,23 @@ namespace lua
 
 
     template<class T> int
+    bind<T>::mat_assign_index( lua_State* L )
+        {
+        auto A = lua_check(L,1);
+        auto k = luaL_checknumber(L,2);
+        auto v = luaL_checknumber(L,3);
+        (*A)[k] = static_cast<typename T::scalar_t>(v);
+        return 0;
+        }
+
+
+    template<class T> int
     bind<T>::mat_call( lua_State* L )
         {
-        if( lua_gettop(L) != 2 )
-            return luaL_error(L,"Matrix type table access takes two integers");
-        T* A = lua_cast(L,1);
+        T* A = lua_check(L,1);
         int i_num=0,j_num=0;
-        int i = lua_tointegerx(L,1,&i_num);
-        int j = lua_tointegerx(L,2,&j_num);
+        int i = lua_tointegerx(L,2,&i_num);
+        int j = lua_tointegerx(L,3,&j_num);
         if( i_num == 0 || j_num == 0 )
             return luaL_error(L,"Invalid types for matrix table access");
         if( i < (int)T::height() && j < (int)T::width() )
@@ -237,9 +312,8 @@ namespace lua
     template<class T> void
     bind<T>::reg( lua_State* L, const char* name )
         {
+        TUMBO_LUA_STACKASSERT(L,0);
         NAME = name;
-
-        //int methods, metatable;
 
         luaL_Reg meta[] =
             {
@@ -247,25 +321,35 @@ namespace lua
             { "__unm", unary_minus },
             { "__sub", sub },
             { "__mul", mul },
-            { "__index", mat_index },
             { "__call", mat_call },
             { "__tostring", tostr },
+            { "__index", mat_index },
+            { "__newindex", mat_assign_index },
             { NULL, NULL }
             };
         luaL_Reg meth[] =
             {
-            { "create", create },
             { NULL, NULL }
             };
-        // Put a new table on the stack and retrieve its index.
+        int metatable, methodtable;
+        /* Create the metatable. */
         luaL_newmetatable( L, NAME );
-        //metatable = lua_gettop( L );
+        metatable = lua_gettop(L);
         luaL_setfuncs( L, meta, 0 );
 
+        /* Create methods table. */
         lua_newtable( L );
+        methodtable = lua_gettop(L);
         luaL_setfuncs( L, meth, 0 );
-        lua_setglobal( L, NAME );
-        lua_pop(L,1); // Remove the metatable.
+        /* Set the method table as the meta __index table. */
+        lua_pushstring(L, "methods");
+        lua_pushvalue(L, methodtable);
+        lua_rawset(L, metatable);
+
+        /* Make the constructor available as a global. */
+        lua_register(L, NAME, create);
+        /* Remove the metatable. */
+        lua_pop(L,2);
         }
 
 

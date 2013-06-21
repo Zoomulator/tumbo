@@ -3,6 +3,7 @@
 #ifndef TUMBO_MATRIX_HPP
 #define TUMBO_MATRIX_HPP
 
+#include <iterator>
 #include <algorithm>
 #include <cassert>
 
