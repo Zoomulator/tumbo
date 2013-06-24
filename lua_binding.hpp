@@ -24,25 +24,33 @@ namespace lua
     class stackassert
         {
         public:
-            stackassert( lua_State* L, int sizechange) :
-                L(L)
+            stackassert( lua_State* L, int sizechange, std::string err="") :
+                L(L),
+                err( std::move(err) )
                 {
                 stacksize = lua_gettop(L) + sizechange;
                 }
 
             ~stackassert()
                 {
-                assert( lua_gettop(L) == stacksize );
+                if( lua_gettop(L) != stacksize )
+                    {
+                    std::cerr << "Oh my.." << std::endl;
+                    throw std::logic_error( err );
+                    }
                 }
 
         private:
             lua_State* L;
             int stacksize;
+            std::string err;
         };
 
     #ifndef NDEBUG
     #define TUMBO_LUA_STACKASSERT( L, sizechange )\
-        stackassert stackguard((L), (sizechange));
+        stackassert stackguard((L), (sizechange),\
+            std::string("Lua stack assert failed: " __FILE__ " ")\
+            + std::to_string(__LINE__));
     #else
     #define TUMBO_LUA_STACKASSERT( L, sizechange )
     #endif
@@ -75,6 +83,9 @@ namespace lua
         sub( lua_State* L );
 
         static int
+        mul( lua_State* L );
+
+        static int
         mat_index( lua_State* L );
 
         static int
@@ -90,7 +101,7 @@ namespace lua
         reg( lua_State* L, const char* name );
         };
 
-    template<class T> const char* bind<T>::NAME = "undef";
+    template<class T> const char* bind<T>::NAME = "undefined_matrix";
 
     // Attempts to cast userdata to the given type.
     // Returns a pointer to the userdata with the correct type. null on failure
@@ -99,7 +110,8 @@ namespace lua
         {
         TUMBO_LUA_STACKASSERT(L,0);
         T* ptr = nullptr;
-        lua_getmetatable( L, index );
+        if( !lua_getmetatable( L, index ) )
+            return nullptr;
         lua_getfield( L, LUA_REGISTRYINDEX, NAME );
         if( lua_rawequal( L, -1, -2 ) )
             ptr = static_cast<T*>( lua_touserdata( L, index ) );
@@ -211,31 +223,72 @@ namespace lua
         return 1;
         }
 
+    template<class T>
+    struct mul_choice
+        {};
 
-    inline int
-    mul( lua_State* L )
+    template<class T, size_t D>
+    struct mul_choice<vec<T,D>>
+        {
+        static int
+        mul( lua_State* L, const vec<T,D>& a, const vec<T,D>& b )
+            {
+            luaL_error(L, "Can't multiply two vectors.");
+            return 0;
+            }
+
+        template<size_t M> static int
+        mul( lua_State* L, const vec<T,D>& a, const matrix<T,M,D>& b )
+            {
+            *bind<matrix<T,D,M>>::push(L) = a * b;
+            return 1;
+            }
+        };
+
+    template<class T, size_t M, size_t N>
+    struct mul_choice<matrix<T,M,N>>
+        {
+        template<size_t O> static int
+        mul( lua_State* L, const matrix<T,M,N>& a, const matrix<T,N,O>& b )
+            {
+            *bind<matrix<T,N,N>>::push(L) = a * b;
+            return 1;
+            }
+        };
+
+    template<class T> int
+    bind<T>::mul( lua_State* L )
         {
         int n = lua_gettop( L );
         if( n != 2 )
             luaL_error(L, "bad argument count");
 
-        fmat44* a = static_cast<fmat44*>( luaL_checkudata(L, 1, "mat44" ) );
-        fvec4* b_v = bind<fvec4>::lua_cast(L,2);
-        fmat44* b_m = bind<fmat44>::lua_cast(L,2);
+        auto a = lua_check(L,1);
+        typedef typename T::scalar_t scalar_t;
+        typedef vec<scalar_t,T::height()> vec_t;
+        typedef matrix<scalar_t,T::height(),T::width()> mat_t;
+        typedef matrix<scalar_t,T::width(),T::width()> res_t;
 
-        if( a == nullptr || (b_v == nullptr && b_m == nullptr) )
+        auto v = bind<vec_t>::lua_cast(L,2);
+        auto m = bind<mat_t>::lua_cast(L,2);
+        int isnum;
+        auto s = lua_tonumberx(L,2,&isnum);
+
+        if( a == nullptr || (!isnum && v == nullptr && m == nullptr) )
+            {
+            std::cerr << "a: " << a << "\nisnum: " << isnum <<
+                "\nv: " << v << "\nm: " << m << std::endl;
             luaL_error(L, "bad argument types");
-
-        if( b_v )
+            }
+        if( isnum )
             {
-            *bind<fvec4>::push(L) = (*a) * (*b_v);
+            *push(L) = s * (*a);
             return 1;
             }
-        else if( b_m )
-            {
-            *bind<fmat44>::push(L) = (*a) * (*b_m);
-            return 1;
-            }
+        else if( v )
+            return mul_choice<T>::mul(L, *a, *v);
+        else if( m )
+            return mul_choice<T>::mul(L, *a, *m);
         return 0;
         }
 

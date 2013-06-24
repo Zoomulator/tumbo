@@ -71,15 +71,15 @@ namespace tumbo
 			const scalar_t*
             end() const;
 
-			static size_t
+			static constexpr size_t
             size()
 				{ return M*N; }
 
-			static size_t
+			static constexpr size_t
             height()
 				{ return M; }
 
-			static size_t
+			static constexpr size_t
             width()
 				{ return N; }
 

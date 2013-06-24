@@ -201,6 +201,22 @@ namespace tumbo
         }
 
 
+    template<class T, size_t D> aabb<T,D>
+    intersect( const aabb<T,D>& a, const aabb<T,D>& b )
+        {
+        auto result = aabb<T,D>::uniform(0);
+        if( !overlaps(a,b) )
+            return result;
+
+        for( int d = 0; d < D; ++d )
+            {
+            result(d,0) = max( a(d,0), b(d,0) );
+            result(d,1) = min( a(d,1), b(d,1) );
+            }
+        return result;
+        }
+
+
     } // namespace tumbo
 
 #endif // TUMBO_AABB_HPP
