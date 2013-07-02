@@ -95,6 +95,9 @@ namespace lua
         mat_call( lua_State* L );
 
         static int
+        mat_size( lua_State* L );
+
+        static int
         tostr( lua_State* L );
 
         static void
@@ -158,6 +161,11 @@ namespace lua
         if( argc == 0 )
             {
             new (push(L)) T();
+            return 1;
+            }
+        if( auto A = lua_cast(L,1) )
+            {
+            new (push(L)) T(*A);
             return 1;
             }
         /* Must provide all elements of the matrix. */
@@ -351,6 +359,15 @@ namespace lua
 
 
     template<class T> int
+    bind<T>::mat_size( lua_State* L )
+        {
+        auto A = lua_check(L,1);
+        lua_pushinteger(L, A->size());
+        return 1;
+        }
+
+
+    template<class T> int
     bind<T>::tostr( lua_State* L )
         {
         auto v = static_cast<T*>( luaL_checkudata(L, 1, NAME) );
@@ -378,6 +395,7 @@ namespace lua
             { "__tostring", tostr },
             { "__index", mat_index },
             { "__newindex", mat_assign_index },
+            { "__len", mat_size },
             { NULL, NULL }
             };
         luaL_Reg meth[] =
