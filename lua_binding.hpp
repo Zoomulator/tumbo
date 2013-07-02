@@ -86,6 +86,9 @@ namespace lua
         mul( lua_State* L );
 
         static int
+        div( lua_State* L );
+
+        static int
         mat_index( lua_State* L );
 
         static int
@@ -302,6 +305,16 @@ namespace lua
 
 
     template<class T> int
+    bind<T>::div( lua_State* L )
+        {
+        auto a = lua_check(L,1);
+        auto n = luaL_checknumber(L,2);
+        *push(L) = (*a) / n;
+        return 1;
+        }
+
+
+    template<class T> int
     bind<T>::mat_index( lua_State* L )
         {
         int isnum = 0;
@@ -394,6 +407,7 @@ namespace lua
             { "__unm", unary_minus },
             { "__sub", sub },
             { "__mul", mul },
+            { "__div", div },
             { "__call", mat_call },
             { "__tostring", tostr },
             { "__index", mat_index },
