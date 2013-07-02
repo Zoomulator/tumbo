@@ -307,6 +307,7 @@ namespace lua
         int isnum = 0;
         auto A = lua_check(L,1);
         int i = lua_tointegerx(L,2,&isnum);
+        --i; // Conversion from lua's 1-indexing
         if( isnum == 0 )
             {
             /* Get methods table. */
@@ -347,6 +348,8 @@ namespace lua
         int i_num=0,j_num=0;
         int i = lua_tointegerx(L,2,&i_num);
         int j = lua_tointegerx(L,3,&j_num);
+        /* Convert from lua's 1-indexing. */
+        --i; --j;
         if( i_num == 0 || j_num == 0 )
             return luaL_error(L,"Invalid types for matrix table access");
         if( i < (int)T::height() && j < (int)T::width() )
