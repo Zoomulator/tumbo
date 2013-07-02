@@ -151,7 +151,7 @@ namespace tumbo
     make_aabb( const vec<T,D> p0, const vec<T,D> p1 )
         {
         vec<T,D> min_p, max_p;
-        for( size_t d; d<D; ++d )
+        for( size_t d=0; d<D; ++d )
             {
             min_p[d] = min(p0[d],p1[d]);
             max_p[d] = max(p0[d],p1[d]);
