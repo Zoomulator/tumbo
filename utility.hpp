@@ -57,6 +57,28 @@ namespace tumbo
 		return R;
 		}
 
+    // Element-wise binary operation
+    template<class T, size_t M, size_t N, typename Op> matrix<T,M,N>
+    ewise(const matrix<T,M,N>& A, const matrix<T,M,N>& B, Op op)
+        {
+        matrix<T,M,N> R;
+        for( size_t i=0; i<M*N; ++i )
+            R[i] = op(A[i],B[i]);
+        return R;
+        }
+
+    template<class T, size_t M, size_t N> matrix<T,M,N>
+    emultiply( const matrix<T,M,N>& A, const matrix<T,M,N>& B )
+        {
+        return ewise(A,B, std::multiplies<T>());
+        }
+
+    template<class T, size_t M, size_t N> matrix<T,M,N>
+    edivision( const matrix<T,M,N>& A, const matrix<T,M,N>& B )
+        {
+        return ewise(A,B, std::divides<T>());
+        }
+
 
     /// Element-wise negation of matrix.
 	template< class T, size_t M, size_t N> matrix<T,M,N>
@@ -224,6 +246,7 @@ namespace tumbo
             for( size_t i=0; i < M1; ++i )
                 result(i,M0+j) = B(i,j);
             }
+        return result;
         }
 
 
