@@ -334,12 +334,12 @@ namespace lua
             return 1;
             //return luaL_error(L,"Invalid index type.");
             }
-        if( i < (int)T::size() )
+        if( 0 <= i && i < (int)T::size() )
             {
             lua_pushnumber( L, (*A)[i] );
             return 1;
             }
-        return luaL_error(L, "Index out of bounds.");
+        return luaL_error(L, "Index out of bounds: %d", i);
         }
 
 
@@ -347,9 +347,10 @@ namespace lua
     bind<T>::mat_assign_index( lua_State* L )
         {
         auto A = lua_check(L,1);
-        auto k = luaL_checknumber(L,2);
+        auto i = luaL_checkint(L,2);
         auto v = luaL_checknumber(L,3);
-        (*A)[k] = static_cast<typename T::scalar_t>(v);
+        --i; // Lua starts counting on 1.
+        (*A)[i] = static_cast<typename T::scalar_t>(v);
         return 0;
         }
 
@@ -365,12 +366,13 @@ namespace lua
         --i; --j;
         if( i_num == 0 || j_num == 0 )
             return luaL_error(L,"Invalid types for matrix table access");
-        if( i < (int)T::height() && j < (int)T::width() )
+        if( 0 <= i && i < (int)T::height() &&
+            0 <= j && j < (int)T::width() )
             {
             lua_pushnumber( L, (*A)(i,j) );
             return 1;
             }
-        return luaL_error(L, "Index out of bounds." );
+        return luaL_error(L, "Index out of bounds: %d,%d", i,j );
         }
 
 
