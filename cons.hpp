@@ -30,8 +30,8 @@ namespace tumbo
 	translation( T x, T y )
 		{
 		auto result = matrix<T,3,3>::identity();
-		result(2,0) = x;
-		result(2,1) = y;
+		result(0,2) = x;
+		result(1,2) = y;
 		return result;
 		}
 
