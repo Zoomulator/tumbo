@@ -162,11 +162,11 @@ namespace tumbo
     /** Usage: The size of the new matrix is specified as template arguments.
         The coordinates gives the top left element in A that will be the first
         element of the submatrix.
-        sumatrix<H,W>( A, y, x )
+        submatrix<H,W>( A, y, x )
     */
 	template< size_t RM, size_t RN, class T, size_t AM, size_t AN >
     matrix<T,RM,RN>
-	submatrix( const matrix<T,AM,AN>& A, size_t oi, size_t oj )
+	submatrix( const matrix<T,AM,AN>& A, size_t oi = 0, size_t oj = 0 )
 		{
 		matrix<T,RM,RN> R;
 
@@ -244,7 +244,7 @@ namespace tumbo
             for( size_t i=0; i < M0; ++i )
                 result(i,j) = A(i,j);
             for( size_t i=0; i < M1; ++i )
-                result(i,M0+j) = B(i,j);
+                result(M0+i,j) = B(i,j);
             }
         return result;
         }
