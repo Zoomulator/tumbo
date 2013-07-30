@@ -37,6 +37,9 @@ namespace lua
         static int
         volume( lua_State* L );
 
+        static int
+        intersect( lua_State* L );
+
         static void
         reg( lua_State* L, const char* name );
         };
@@ -122,6 +125,17 @@ namespace lua
         }
 
 
+    template<class T, size_t D> int
+    bind_aabb<aabb<T,D>>::intersect( lua_State* L )
+        {
+        auto self = bind<aabb<T,D>>::lua_check(L,1);
+        auto other = bind<aabb<T,D>>::lua_check(L,2);
+        auto d = ::tumbo::intersect(*self, *other);
+        *bind<aabb<T,D>>::push(L) = d;
+        return 1;
+        }
+
+
     template<class T, size_t D> void
     bind_aabb<aabb<T,D>>::reg( lua_State* L, const char* name )
         {
@@ -139,6 +153,7 @@ namespace lua
             {"translate",translate},
             {"place",place},
             {"volume",volume},
+            {"intersect",intersect},
             {NULL,NULL}
             };
 
