@@ -7,6 +7,8 @@
 
 namespace tumbo
     {
+    template<typename T> using scalar = matrix<T,1,1>;
+
     template<typename T,size_t D> using vec = matrix<T,D,1>;
     template<typename T> using vec2 = vec<T,2>;
     template<typename T> using vec3 = vec<T,3>;
