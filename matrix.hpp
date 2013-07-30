@@ -6,6 +6,7 @@
 #include <iterator>
 #include <algorithm>
 #include <cassert>
+#include "assert.hpp"
 
 
 namespace tumbo
@@ -166,6 +167,8 @@ namespace tumbo
     typename matrix<T,M,N>::scalar_t&
     matrix<T,M,N>::operator() ( size_t i, size_t j )
         {
+        TUMBO_ASSERT( i < M )
+        TUMBO_ASSERT( j < N )
         return data_[ j + i*N ];
         }
 
@@ -174,6 +177,8 @@ namespace tumbo
     const typename matrix<T,M,N>::scalar_t&
     matrix<T,M,N>::operator() ( size_t i, size_t j ) const
         {
+        TUMBO_ASSERT( i < M )
+        TUMBO_ASSERT( j < N )
         return data_[ j + i*N ];
         }
 
@@ -182,6 +187,7 @@ namespace tumbo
     typename matrix<T,M,N>::scalar_t&
     matrix<T,M,N>::operator[] ( size_t i )
         {
+        TUMBO_ASSERT( i < M*N );
         return data_[i];
         }
 
@@ -190,6 +196,7 @@ namespace tumbo
     const typename matrix<T,M,N>::scalar_t&
     matrix<T,M,N>::operator[] ( size_t i ) const
         {
+        TUMBO_ASSERT( i < M*N );
         return data_[i];
         }
 
