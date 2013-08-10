@@ -87,6 +87,25 @@ namespace tumbo
 		}
 
 
+    template<class T> matrix<T,4,4>
+    ortho(
+        T left, T right,
+        T bottom, T top,
+        T near, T far )
+        {
+        T x_ortho = T( 2) / (right - left);
+        T y_ortho = T( 2) / (top - bottom);
+        T z_ortho = T(-2) / (far - near);
+        T tx = -(right + left) / (right - left);
+        T ty = -(top + bottom) / (top - bottom);
+        T tz = -(far + near)   / (far - near);
+        return matrix<T,4,4>{
+            x_ortho, 0,       0,       tx,
+            0,       y_ortho, 0,       ty,
+            0,       0,       z_ortho, tz,
+            0,       0,       0,       0   };
+        }
+
     } // namespace tumbo
 
 #endif // TUMBO_CONS_HPP
