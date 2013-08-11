@@ -114,7 +114,7 @@ namespace tumbo
             x_ortho, 0,       0,       tx,
             0,       y_ortho, 0,       ty,
             0,       0,       z_ortho, tz,
-            0,       0,       0,       0   };
+            0,       0,       0,       1   };
         }
 
     } // namespace tumbo
