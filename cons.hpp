@@ -88,6 +88,17 @@ namespace tumbo
 
 
     template<class T> matrix<T,4,4>
+    scaling( T x, T y, T z )
+        {
+        matrix<T,4,4> R = matrix<T,4,4>::identity();
+        R(0,0) = x;
+        R(1,1) = y;
+        R(2,2) = z;
+        return R;
+        }
+
+
+    template<class T> matrix<T,4,4>
     ortho(
         T left, T right,
         T bottom, T top,
