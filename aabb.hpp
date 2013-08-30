@@ -151,7 +151,7 @@ namespace tumbo
 
 
     /* Convert rect type {x,y,w,h} to aabb. */
-    template<class T, class R, size_t D> aabb<T,D>
+    template<class T, size_t D, class R> aabb<T,D>
     make_aabb_rect( const R& rect )
         {
         T data[D*2];

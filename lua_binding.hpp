@@ -293,7 +293,7 @@ namespace lua
             }
         if( isnum )
             {
-            *push(L) = s * (*a);
+            *push(L) = static_cast<scalar_t>(s) * (*a);
             return 1;
             }
         else if( v )
@@ -307,9 +307,10 @@ namespace lua
     template<class T> int
     bind<T>::div( lua_State* L )
         {
+        typedef typename T::scalar_t scalar_t;
         auto a = lua_check(L,1);
         auto n = luaL_checknumber(L,2);
-        *push(L) = (*a) / n;
+        *push(L) = (*a) / static_cast<scalar_t>(n);
         return 1;
         }
 
