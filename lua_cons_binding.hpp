@@ -91,12 +91,16 @@ namespace lua
         }
 
     template<class T> void
-    reg_cons( lua_State* L )
+    reg_cons( lua_State* L, const std::string& type_posfix = "" )
         {
-        lua_register(L, "translation", cons_translation<T>);
-        lua_register(L, "rotation", cons_rotation<T>);
-        lua_register(L, "scaling", cons_scaling<T>);
-        lua_register(L, "ortho", cons_ortho<T>);
+        auto str_translation = "translation" + type_postfix;
+        auto str_rotation = "rotation" + type_postfix;
+        auto str_scaling = "scaling" + type_postfix;
+        auto str_ortho = "ortho" + type_postfix;
+        lua_register(L, str_translation.c_str(), cons_translation<T>);
+        lua_register(L, str_rotation.c_str(),    cons_rotation<T>);
+        lua_register(L, str_scaling.c_str(),     cons_scaling<T>);
+        lua_register(L, str_ortho.c_str(),       cons_ortho<T>);
         }
 
     } /* namespace lua */
