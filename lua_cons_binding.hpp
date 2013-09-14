@@ -91,7 +91,7 @@ namespace lua
         }
 
     template<class T> void
-    reg_cons( lua_State* L, const std::string& type_posfix = "" )
+    reg_cons( lua_State* L, const std::string& type_postfix = "" )
         {
         auto str_translation = "translation" + type_postfix;
         auto str_rotation = "rotation" + type_postfix;
