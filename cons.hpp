@@ -2,7 +2,7 @@
 #define TUMBO_CONS_HPP
 
 #include "matrix.hpp"
-
+#include "utility.hpp"
 
 /**
     \file cons.hpp
@@ -12,28 +12,13 @@
 namespace tumbo
     {
 
-
-	/// Constructor for an affine 3D translation matrix.
-	template<class T> matrix<T,4,4>
-	translation( T x, T y, T z )
-		{
-		auto result = matrix<T,4U,4U>::identity();
-		result(0,3) = x;
-		result(1,3) = y;
-		result(2,3) = z;
-		return result;
-		}
-
-
-	/// Constructor for an affine 2D translation matrix.
-	template<class T> matrix<T,3,3>
-	translation( T x, T y )
-		{
-		auto result = matrix<T,3,3>::identity();
-		result(0,2) = x;
-		result(1,2) = y;
-		return result;
-		}
+    template<class T, size_t D> matrix<T,D+1,D+1>
+    translation( matrix<T,D,1> v )
+        {
+        auto r = matrix<T,D+1,D+1>::identity();
+        assign_column( r, D, v );
+        return r;
+        }
 
 
 	/// Contructor for an affine 3D rotation matrix.
@@ -76,24 +61,12 @@ namespace tumbo
 		}
 
 
-    /// Constructor for an affine 2D scale matrix.
-	template<class T> matrix<T,3,3>
-	scaling( T x, T y )
-		{
-		matrix<T,3,3> R = matrix<T,3,3>::identity();
-		R(0,0) = x;
-		R(1,1) = y;
-		return R;
-		}
-
-
-    template<class T> matrix<T,4,4>
-    scaling( T x, T y, T z )
+    template<class T, size_t D> matrix<T,D+1,D+1>
+    scaling( matrix<T,D,1> v )
         {
-        matrix<T,4,4> R = matrix<T,4,4>::identity();
-        R(0,0) = x;
-        R(1,1) = y;
-        R(2,2) = z;
+        auto R = matrix<T,D+1,D+1>::identity();
+        for( size_t d = 0; d < D; ++d )
+            R(d,d) = v[d];
         return R;
         }
 
