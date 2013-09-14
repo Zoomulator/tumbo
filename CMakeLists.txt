@@ -7,6 +7,7 @@ set( TUMBO_HEADERS
     cons.hpp
     io.hpp
     lua_binding.hpp
+    lua_cons_binding.hpp
     lua_aabb_binding.hpp
     matrix.hpp
     tumbo.hpp

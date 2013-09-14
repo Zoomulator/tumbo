@@ -151,6 +151,9 @@ namespace lua
         TUMBO_LUA_STACKASSERT(L,1);
         void* userdata = lua_newuserdata( L, sizeof(T) );
         luaL_setmetatable( L, NAME );
+        if( lua_getmetatable(L,-1) == 0 )
+            std::cerr << "No metatable assigned to " << NAME << std::endl;
+        else lua_pop(L,1);
         return static_cast<T*>(userdata);
         }
 
