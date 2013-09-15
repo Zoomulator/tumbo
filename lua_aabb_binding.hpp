@@ -158,7 +158,7 @@ namespace lua
             };
 
         /* Add additional methods to the method table. */
-        luaL_getmetatable(L, (bind<aabb<T,D>>::NAME));
+        luaL_getmetatable(L, (bind<aabb<T,D>>::NAME).c_str());
         metatable = lua_gettop(L);
         /* Get the method table from the metatable. */
         lua_pushstring(L, "methods");
