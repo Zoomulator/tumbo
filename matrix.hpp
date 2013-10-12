@@ -12,6 +12,10 @@
 
 namespace tumbo
 	{
+    namespace components
+        {
+        enum cmps { X=0, Y, Z, W };
+        }
 
 	/**
         \class matrix
