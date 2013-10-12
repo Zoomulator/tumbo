@@ -14,7 +14,9 @@ namespace tumbo
 
     template<typename T,size_t D> using
     aabb = tumbo::matrix<T,D,2>; // Two points, low and high corners
-
+    /* That means for a 2D aabb you'd construct it like
+    aabb{ loX, hiX, loY, hiY }
+    */
 
     typedef aabb<float,3>   faabb3;
     typedef aabb<float,2>   faabb2;
@@ -112,6 +114,7 @@ namespace tumbo
         }
 
 
+    /* TODO: 2D corners should preferably come in clockwise order. */
     template<class T,size_t D> std::vector<vec<T,D>>
     corners( const aabb<T,D>& a )
         {
@@ -143,6 +146,18 @@ namespace tumbo
         for( size_t d=0; d<D; ++d )
             if( a(d,0) > a(d,1) ) return false;
         return true;
+        }
+
+
+
+    /* Convert rect type {x,y,w,h} to aabb. */
+    template<class T, size_t D, class R> aabb<T,D>
+    make_aabb_rect( const R& rect )
+        {
+        T data[D*2];
+        for( size_t i=0; i<D*2; ++i )
+            data[i] = i&1 ? rect[i/2] + rect[i/2+D] : rect[i/2];
+        return aabb<T,D>{data};
         }
 
 

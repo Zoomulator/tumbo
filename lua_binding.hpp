@@ -59,7 +59,7 @@ namespace lua
     template<class T>
     struct bind
         {
-        static const char* NAME;
+        static std::string NAME;
 
         static T*
         lua_cast( lua_State* L, int index );
@@ -104,10 +104,10 @@ namespace lua
         tostr( lua_State* L );
 
         static void
-        reg( lua_State* L, const char* name );
+        reg( lua_State* L, const std::string& name );
         };
 
-    template<class T> const char* bind<T>::NAME = "undefined_matrix";
+    template<class T> std::string bind<T>::NAME = "undefined_matrix";
 
     // Attempts to cast userdata to the given type.
     // Returns a pointer to the userdata with the correct type. null on failure
@@ -118,7 +118,7 @@ namespace lua
         T* ptr = nullptr;
         if( !lua_getmetatable( L, index ) )
             return nullptr;
-        lua_getfield( L, LUA_REGISTRYINDEX, NAME );
+        lua_getfield( L, LUA_REGISTRYINDEX, NAME.c_str() );
         if( lua_rawequal( L, -1, -2 ) )
             ptr = static_cast<T*>( lua_touserdata( L, index ) );
 
@@ -138,7 +138,7 @@ namespace lua
             {
             luaL_error(L,
                 "Bad type for argument %d: Type %s required",
-                index, NAME );
+                index, NAME.c_str() );
             return nullptr;
             }
         }
@@ -150,7 +150,10 @@ namespace lua
         {
         TUMBO_LUA_STACKASSERT(L,1);
         void* userdata = lua_newuserdata( L, sizeof(T) );
-        luaL_setmetatable( L, NAME );
+        luaL_setmetatable( L, NAME.c_str() );
+        if( lua_getmetatable(L,-1) == 0 )
+            std::cerr << "No metatable assigned to " << NAME.c_str() << std::endl;
+        else lua_pop(L,1);
         return static_cast<T*>(userdata);
         }
 
@@ -193,8 +196,8 @@ namespace lua
         if( n != 2 )
             luaL_error(L, "bad argument count");
 
-        T* a = static_cast<T*>( luaL_checkudata(L, 1, NAME) );
-        T* b = static_cast<T*>( luaL_checkudata(L, 2, NAME) );
+        T* a = static_cast<T*>( luaL_checkudata(L, 1, NAME.c_str()) );
+        T* b = static_cast<T*>( luaL_checkudata(L, 2, NAME.c_str()) );
         if( a == nullptr || b == nullptr )
             luaL_error(L, "bad argument types");
 
@@ -210,7 +213,7 @@ namespace lua
         if( n != 1 )
             luaL_error(L, "bad argument count");
 
-        T* a = static_cast<T*>( luaL_checkudata(L, 1, NAME) );
+        T* a = static_cast<T*>( luaL_checkudata(L, 1, NAME.c_str()) );
         if( a == nullptr )
             luaL_error(L, "bad argument types");
 
@@ -225,8 +228,8 @@ namespace lua
         int n = lua_gettop( L ); // passed arguments
         if( n != 2 )
             luaL_error(L, "bad argument count");
-        T* a = static_cast<T*>( luaL_checkudata(L, 1, NAME) );
-        T* b = static_cast<T*>( luaL_checkudata(L, 2, NAME) );
+        T* a = static_cast<T*>( luaL_checkudata(L, 1, NAME.c_str()) );
+        T* b = static_cast<T*>( luaL_checkudata(L, 2, NAME.c_str()) );
         if( a == nullptr || b == nullptr )
             luaL_error(L, "bad argument types");
 
@@ -293,7 +296,7 @@ namespace lua
             }
         if( isnum )
             {
-            *push(L) = s * (*a);
+            *push(L) = static_cast<scalar_t>(s) * (*a);
             return 1;
             }
         else if( v )
@@ -307,9 +310,10 @@ namespace lua
     template<class T> int
     bind<T>::div( lua_State* L )
         {
+        typedef typename T::scalar_t scalar_t;
         auto a = lua_check(L,1);
         auto n = luaL_checknumber(L,2);
-        *push(L) = (*a) / n;
+        *push(L) = (*a) / static_cast<scalar_t>(n);
         return 1;
         }
 
@@ -388,7 +392,7 @@ namespace lua
     template<class T> int
     bind<T>::tostr( lua_State* L )
         {
-        auto v = static_cast<T*>( luaL_checkudata(L, 1, NAME) );
+        auto v = static_cast<T*>( luaL_checkudata(L, 1, NAME.c_str()) );
         std::stringstream ss;
         ss << *v;
         std::string str = ss.str();
@@ -398,7 +402,7 @@ namespace lua
 
 
     template<class T> void
-    bind<T>::reg( lua_State* L, const char* name )
+    bind<T>::reg( lua_State* L, const std::string& name )
         {
         TUMBO_LUA_STACKASSERT(L,0);
         NAME = name;
@@ -423,7 +427,7 @@ namespace lua
             };
         int metatable, methodtable;
         /* Create the metatable. */
-        luaL_newmetatable( L, NAME );
+        luaL_newmetatable( L, NAME.c_str() );
         metatable = lua_gettop(L);
         luaL_setfuncs( L, meta, 0 );
 
@@ -437,7 +441,7 @@ namespace lua
         lua_rawset(L, metatable);
 
         /* Make the constructor available as a global. */
-        lua_register(L, NAME, create);
+        lua_register(L, NAME.c_str(), create);
         /* Remove the metatable. */
         lua_pop(L,2);
         }
