@@ -108,6 +108,24 @@ namespace tumbo
 		return sum;
 		}
 
+    /// Special case of cross product for 2D vectors. Returns scalar.
+    template<class T> T
+    cross( const matrix<T,2,1>& A, const matrix<T,2,1>& B )
+        {
+        using namespace tumbo::components;
+        return A[X]*B[Y] - A[Y]*B[X];
+        }
+
+    /// Returns the cross product vector of two vectors.
+    template<class T, size_t D> matrix<T,D,1>
+    cross( const matrix<T,D,1>& A, const matrix<T,D,1>& B )
+        {
+        matrix<T,D,1> R;
+        for( size_t d=0; d<D; ++d )
+            R[d] = A[(d+1)%D] * B[(d+2)%D] - A[(d+D-1)%D] * B[(d+D-2)%D];
+        return R;
+        }
+
 
     /// Returns the squared length of a vector matrix.
     /**
