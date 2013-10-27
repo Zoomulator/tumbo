@@ -6,11 +6,16 @@
 #include <iterator>
 #include <algorithm>
 #include <cassert>
+#include <cstring>
 #include "assert.hpp"
 
 
 namespace tumbo
 	{
+    namespace components
+        {
+        enum cmps { X=0, Y, Z, W };
+        }
 
 	/**
         \class matrix
@@ -31,6 +36,7 @@ namespace tumbo
 			static matrix uniform(scalar_t);
 
 			matrix() {}
+            matrix( const matrix& );
             matrix( std::initializer_list<T> l );
 
 			template<class container>
@@ -110,6 +116,13 @@ namespace tumbo
 			A[i] = s;
 		return A;
 		}
+
+
+    template< class T, size_t M, size_t N >
+    matrix<T,M,N>::matrix( const matrix<T,M,N>& other )
+        {
+        std::memcpy( this, &other, sizeof(matrix<T,M,N>) );
+        }
 
 
     template < class T, size_t M, size_t N >
