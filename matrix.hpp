@@ -32,7 +32,6 @@ namespace tumbo
 		public:
 			typedef T scalar_t;
 
-			static matrix identity();
 			static matrix uniform(scalar_t);
 
 			matrix() {}
@@ -93,29 +92,6 @@ namespace tumbo
 		private:
 			scalar_t data_[ M*N ];
 		};
-
-
-	/// Constructor for Identity matrix.
-	template< class T, size_t M, size_t N > matrix<T,M,N>
-	matrix<T,M,N>::identity()
-		{
-		matrix<T,M,N> A;
-		for( size_t i=0; i<M*N; ++i )
-			A[i] = static_cast<T>(i % (N+1) == 0 ? 1 : 0);
-
-		return A;
-		}
-
-
-	/// Creates a uniform matrix. All elements will have the given value
-	template< class T, size_t M, size_t N > matrix<T,M,N>
-	matrix<T,M,N>::uniform(typename matrix<T,M,N>::scalar_t s)
-		{
-		matrix<T,M,N> A;
-		for( size_t i=0; i<M*N; ++i )
-			A[i] = s;
-		return A;
-		}
 
 
     template< class T, size_t M, size_t N >

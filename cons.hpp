@@ -11,6 +11,28 @@
 
 namespace tumbo
     {
+    template<typename matrix> matrix
+    identity()
+        {
+        static_assert( matrix::width() == matrix::height(),
+            "Only square matrix types has identity." );
+		matrix A;
+		for( size_t i=0; i<matrix::size(); ++i )
+			A[i] = static_cast<typename matrix::scalar_t>(
+                i % (matrix::width()+1) == 0 ? 1 : 0);
+		return A;
+        }
+
+
+	template<typename matrix> matrix
+	uniform(typename matrix::scalar_t s)
+		{
+		matrix A;
+		for( size_t i=0; i<matrix::size(); ++i )
+			A[i] = s;
+		return A;
+		}
+
 
     template<class T, size_t D> matrix<T,D+1,D+1>
     translation( matrix<T,D,1> v )
