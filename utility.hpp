@@ -8,6 +8,7 @@
 
 namespace tumbo
 	{
+    const double PI = 3.1415926535897932384626433832795028841971693993751058;
 
     /// Cast a matrix to another equal sized matrix with different inner type.
     template<class S, class T, size_t M, size_t N> matrix<S,M,N>
