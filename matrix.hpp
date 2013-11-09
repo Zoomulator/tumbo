@@ -38,17 +38,14 @@ namespace tumbo
             matrix( const matrix& );
             matrix( std::initializer_list<T> l );
 
-			template<class container>
-			matrix( const container& new_data );
-
             template<class Iter>
             matrix( Iter first, Iter end );
 
             template<class Iter> matrix&
             assign( Iter first, Iter end );
 
-			template<class container> matrix&
-			operator = ( const container& new_data );
+            matrix&
+            operator = ( const matrix& );
 
 			scalar_t&
             operator() ( size_t i, size_t j );
@@ -104,7 +101,7 @@ namespace tumbo
     template < class T, size_t M, size_t N >
     matrix<T,M,N>::matrix( std::initializer_list<T> l )
         {
-        *this = l;
+        assign(l.begin(), l.end());
         }
 
 
@@ -117,21 +114,11 @@ namespace tumbo
 
 
     template < class T, size_t M, size_t N >
-    template<class container>
-    matrix<T,M,N>::matrix( const container& new_data )
-        {
-        *this = new_data;
-        }
-
-
-
-    template < class T, size_t M, size_t N >
-    template<class container>
     matrix<T,M,N>&
-    matrix<T,M,N>::operator = ( const container& new_data )
+    matrix<T,M,N>::operator = ( const matrix<T,M,N>& other )
         {
-        auto it = std::begin(new_data);
-        auto end = std::end(new_data);
+        auto it = std::begin(other);
+        auto end = std::end(other);
         return assign(it,end);
         }
 
