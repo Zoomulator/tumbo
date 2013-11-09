@@ -14,7 +14,7 @@ namespace tumbo
 	{
     namespace components
         {
-        enum cmps { X=0, Y, Z, W };
+        enum cmp { X=0, Y, Z, W };
         }
 
 	/**
