@@ -11,7 +11,9 @@ set( TUMBO_HEADERS
     lua_cons_binding.hpp
     lua_aabb_binding.hpp
     matrix.hpp
+    swizzling.hpp
     tumbo.hpp
+    types.hpp
     utility.hpp )
 
 install( FILES ${TUMBO_HEADERS} DESTINATION "include/tumbo" )
