@@ -37,7 +37,7 @@ namespace tumbo
     template<class T, size_t D> matrix<T,D+1,D+1>
     translation( matrix<T,D,1> v )
         {
-        auto r = matrix<T,D+1,D+1>::identity();
+        auto r = identity<matrix<T,D+1,D+1>>();
         assign_column( r, D, v );
         return r;
         }
@@ -49,7 +49,7 @@ namespace tumbo
 		{
 		T mag = T( sqrt( x*x + y*y + z*z ) );
 		if( mag == 0.0f )
-			return matrix<T,4,4>::identity();
+			return identity<matrix<T,4,4>>();
 
 		x /= mag; y /= mag; z /= mag;
 
@@ -74,7 +74,7 @@ namespace tumbo
 	template<class T> matrix<T,3,3>
 	rotation( T rad )
 		{
-		matrix<T,3,3> R = matrix<T,3,3>::identity();
+		matrix<T,3,3> R = identity<matrix<T,3,3>>();
 		R(0,0) = cos(rad);
 		R(1,0) = sin(rad);
 		R(0,1) = -R(1,0);
@@ -86,7 +86,7 @@ namespace tumbo
     template<class T, size_t D> matrix<T,D+1,D+1>
     scaling( matrix<T,D,1> v )
         {
-        auto R = matrix<T,D+1,D+1>::identity();
+        auto R = identity<matrix<T,D+1,D+1>>();
         for( size_t d = 0; d < D; ++d )
             R(d,d) = v[d];
         return R;
