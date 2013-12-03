@@ -65,7 +65,7 @@ namespace tumbo
 			0,					0,					0,						1 };
 
 		matrix<T,4,4> R;
-		R = data;
+		R.assign( data, data+16 );
 		return R;
 		}
 
