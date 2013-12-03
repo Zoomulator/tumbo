@@ -1,7 +1,7 @@
 #ifndef TUMBO_LUA_STD_BIND_HPP
 #define TUMBO_LUA_STD_BIND_HPP
 #include <string>
-#include <lua.hpp>
+//#include <lua.hpp>
 #include <tumbo/tumbo.hpp>
 #include <tumbo/lua_binding.hpp>
 #include <tumbo/lua_cons_binding.hpp>

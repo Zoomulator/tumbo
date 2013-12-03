@@ -8,7 +8,7 @@ namespace tumbo
     {
 namespace lua
     {
-    const char* CONS_ARG_ERROR = "%s constructor given wrong arguments. (%d)";
+    #define CONS_ARG_ERROR "%s constructor given wrong arguments. (%d)"
 
     template<class T> int
     cons_translation( lua_State* L )
@@ -21,7 +21,7 @@ namespace lua
 
         if( argc == 3 )
             new (bind<matrix<T,4,4>>::push(L)) matrix<T,4,4>(
-                translation<T>( vec<T,3>{argv} ) );
+                translation<T>( vec<T,3>{argv, argv+3} ) );
         else if( argc == 2 )
             new (bind<matrix<T,3,3>>::push(L)) matrix<T,3,3>(
                 translation<T>( vec<T,2>{argv[0], argv[1]} ) );
@@ -62,7 +62,7 @@ namespace lua
 
         if( argc == 3 )
             new (bind<matrix<T,4,4>>::push(L)) matrix<T,4,4>(
-                scaling( vec<T,3>{ args } ) );
+                scaling( vec<T,3>{ args, args+3 } ) );
         else if( argc == 2 )
             new (bind<matrix<T,3,3>>::push(L)) matrix<T,3,3>(
                 scaling( vec<T,2>{ args[0], args[1] } ) );

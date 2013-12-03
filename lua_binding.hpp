@@ -2,7 +2,7 @@
 #define TUMBO_BIND_MATRIX_HPP
 
 
-#include <lua.hpp>
+//#include <lua.hpp>
 #include <typeindex>
 #include <map>
 #include <string>
@@ -53,6 +53,13 @@ namespace lua
             + std::to_string(__LINE__));
     #else
     #define TUMBO_LUA_STACKASSERT( L, sizechange )
+    #endif
+
+
+    #if LUA_VERSION_NUM >= 520
+        #define TUMBO_LUA_SETFUNCS(L,F) luaL_setfuncs((L), (F), 0 );
+    #else
+        #define TUMBO_LUA_SETFUNCS(L,F) luaL_register((L), nullptr, (F));
     #endif
 
 
@@ -150,10 +157,16 @@ namespace lua
         {
         TUMBO_LUA_STACKASSERT(L,1);
         void* userdata = lua_newuserdata( L, sizeof(T) );
-        luaL_setmetatable( L, NAME.c_str() );
-        if( lua_getmetatable(L,-1) == 0 )
+        luaL_getmetatable( L, NAME.c_str() );
+        if( lua_isnil(L,-1) )
+            {
             std::cerr << "No metatable assigned to " << NAME.c_str() << std::endl;
-        else lua_pop(L,1);
+            lua_pop(L,1);
+            }
+        else
+            {
+            lua_setmetatable( L, -2 );
+            }
         return static_cast<T*>(userdata);
         }
 
@@ -265,7 +278,7 @@ namespace lua
         template<size_t O> static int
         mul( lua_State* L, const matrix<T,M,N>& a, const matrix<T,N,O>& b )
             {
-            *bind<matrix<T,N,N>>::push(L) = a * b;
+            *bind<matrix<T,M,O>>::push(L) = a * b;
             return 1;
             }
         };
@@ -285,8 +298,7 @@ namespace lua
 
         auto v = bind<vec_t>::lua_cast(L,2);
         auto m = bind<mat_t>::lua_cast(L,2);
-        int isnum;
-        auto s = lua_tonumberx(L,2,&isnum);
+        int isnum = lua_isnumber(L,2);
 
         if( a == nullptr || (!isnum && v == nullptr && m == nullptr) )
             {
@@ -294,8 +306,10 @@ namespace lua
                 "\nv: " << v << "\nm: " << m << std::endl;
             luaL_error(L, "bad argument types");
             }
+
         if( isnum )
             {
+            auto s = lua_tonumber(L,2);
             *push(L) = static_cast<scalar_t>(s) * (*a);
             return 1;
             }
@@ -303,6 +317,7 @@ namespace lua
             return mul_choice<T>::mul(L, *a, *v);
         else if( m )
             return mul_choice<T>::mul(L, *a, *m);
+
         return 0;
         }
 
@@ -321,11 +336,21 @@ namespace lua
     template<class T> int
     bind<T>::mat_index( lua_State* L )
         {
-        int isnum = 0;
         auto A = lua_check(L,1);
-        int i = lua_tointegerx(L,2,&isnum);
-        --i; // Conversion from lua's 1-indexing
-        if( isnum == 0 )
+        int isnum = lua_isnumber(L,2);
+        int i = -1;
+        if( isnum )
+            i = lua_tointeger(L,2) - 1; /* Convert to C index. */
+        else if( lua_isstring(L,2) )
+            {
+            const char* str = lua_tostring(L,2);
+            if( strlen(str) == 1 )
+                if( 'x' <= str[0] && str[0] <= 'z' )
+                    i = str[0] - 'x';
+                else if( str[0] == 'w' )
+                    i = 3;
+            }
+        if( i<0 && isnum == 0 )
             {
             /* Get methods table. */
             lua_getmetatable(L,1);
@@ -338,6 +363,7 @@ namespace lua
             return 1;
             //return luaL_error(L,"Invalid index type.");
             }
+
         if( 0 <= i && i < (int)T::size() )
             {
             lua_pushnumber( L, (*A)[i] );
@@ -351,10 +377,23 @@ namespace lua
     bind<T>::mat_assign_index( lua_State* L )
         {
         auto A = lua_check(L,1);
-        auto i = luaL_checkint(L,2);
+        int i = -1;
         auto v = luaL_checknumber(L,3);
-        --i; // Lua starts counting on 1.
-        (*A)[i] = static_cast<typename T::scalar_t>(v);
+        if( lua_isnumber(L,2) )
+            i = lua_tonumber(L,2) - 1;
+        else if( lua_isstring(L,2) )
+            {
+            const char* str = lua_tostring(L,2);
+            if( strlen(str) == 1 )
+                if( 'x' <= str[0] && str[0] <= 'z' )
+                    i = str[0] - 'x';
+                else if( str[0] == 'w' )
+                    i = 3;
+            }
+        if( i < 0 )
+            luaL_error(L, "Bad index for assignment." );
+        else
+            (*A)[i] = static_cast<typename T::scalar_t>(v);
         return 0;
         }
 
@@ -363,13 +402,15 @@ namespace lua
     bind<T>::mat_call( lua_State* L )
         {
         T* A = lua_check(L,1);
-        int i_num=0,j_num=0;
-        int i = lua_tointegerx(L,2,&i_num);
-        int j = lua_tointegerx(L,3,&j_num);
-        /* Convert from lua's 1-indexing. */
-        --i; --j;
+        int i_num = lua_isnumber(L,2);
+        int j_num = lua_isnumber(L,3);
         if( i_num == 0 || j_num == 0 )
             return luaL_error(L,"Invalid types for matrix table access");
+
+        int i = lua_tointeger(L,2);
+        int j = lua_tointeger(L,3);
+        /* Convert from lua's 1-indexing. */
+        --i; --j;
         if( 0 <= i && i < (int)T::height() &&
             0 <= j && j < (int)T::width() )
             {
@@ -429,12 +470,12 @@ namespace lua
         /* Create the metatable. */
         luaL_newmetatable( L, NAME.c_str() );
         metatable = lua_gettop(L);
-        luaL_setfuncs( L, meta, 0 );
+        TUMBO_LUA_SETFUNCS( L, meta );
 
         /* Create methods table. */
         lua_newtable( L );
         methodtable = lua_gettop(L);
-        luaL_setfuncs( L, meth, 0 );
+        TUMBO_LUA_SETFUNCS( L, meth );
         /* Set the method table as the meta __index table. */
         lua_pushstring(L, "methods");
         lua_pushvalue(L, methodtable);

@@ -164,7 +164,7 @@ namespace lua
         lua_pushstring(L, "methods");
         lua_rawget(L, metatable);
 
-        luaL_setfuncs(L, aabb_methods, 0);
+        TUMBO_LUA_SETFUNCS(L, aabb_methods);
         lua_pop(L,2);
         }
 
