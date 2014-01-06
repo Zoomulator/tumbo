@@ -3,6 +3,7 @@
 
 #include "matrix.hpp"
 #include "utility.hpp"
+#include <cmath>
 
 /**
     \file cons.hpp
@@ -47,14 +48,14 @@ namespace tumbo
 	template<class T> matrix<T,4,4>
 	rotation( T rad, T x, T y, T z )
 		{
-		T mag = T( sqrt( x*x + y*y + z*z ) );
+		T mag = T( std::sqrt( x*x + y*y + z*z ) );
 		if( mag == 0.0f )
 			return identity<matrix<T,4,4>>();
 
 		x /= mag; y /= mag; z /= mag;
 
-		T s = sin(rad);
-		T c = cos(rad);
+		T s = std::sin(rad);
+		T c = std::cos(rad);
 		T one_c = 1.0f - c;
 
 		const T data[16] =
@@ -75,8 +76,8 @@ namespace tumbo
 	rotation( T rad )
 		{
 		matrix<T,3,3> R = identity<matrix<T,3,3>>();
-		R(0,0) = cos(rad);
-		R(1,0) = sin(rad);
+		R(0,0) = std::cos(rad);
+		R(1,0) = std::sin(rad);
 		R(0,1) = -R(1,0);
 		R(1,1) = R(0,0);
 		return R;
