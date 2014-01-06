@@ -260,8 +260,9 @@ namespace lua
         static int
         mul( lua_State* L, const vec<T,D>& a, const vec<T,D>& b )
             {
-            luaL_error(L, "Can't multiply two vectors.");
-            return 0;
+            //luaL_error(L, "Can't multiply two vectors.");
+            *bind<vec<T,D>>::push(L) = emultiply(a, b);
+            return 1;
             }
 
         template<size_t M> static int
