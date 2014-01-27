@@ -1,10 +1,56 @@
 #include "tumbo.hpp"
 #include "io.hpp"
 
+#include <gtest/gtest.h>
 
+using namespace tumbo;
 
-void
-test_swizzling()
+TEST( MatOp, M44Inverse )
+    {
+    fmat44 m0{
+        1, 0, 0, 3,
+        0, 1, 0, 2,
+        0, 0, 1, 7,
+        0, 0, 0, 1 };
+
+    auto m1 = inverse(m0);
+    auto m2 = inverse(m1);
+    for( int i=0; i<16; ++i )
+        ASSERT_FLOAT_EQ( m2[i], m0[i] );
+    }
+
+TEST( MatOp, M33Inverse )
+    {
+    fmat33 m0{
+        1, 2, 5,
+        0, 3, 0,
+        0, 0, 1 };
+
+    auto m1 = inverse(m0);
+    auto m2 = inverse(m1);
+    for( int i=0; i<9; ++i )
+        ASSERT_FLOAT_EQ( m2[i], m0[i] );
+    }
+
+TEST( MatOp, M22Inverse )
+    {
+    fmat22 m0{
+        96, 48,
+        0,  35 };
+    fmat22 expect{
+        0.010416667, -0.014285715,
+        0,          0.028571431 };
+
+    auto m1 = inverse(m0);
+    auto m2 = inverse(m1);
+    for( int i=0; i<4; ++i )
+        {
+        ASSERT_FLOAT_EQ( expect[i], m1[i] );
+        ASSERT_FLOAT_EQ( m0[i], m2[i] );
+        }
+    }
+
+TEST( Swizzling, Swizz )
     {
     using namespace tumbo;
     using namespace components;
@@ -15,21 +61,17 @@ test_swizzling()
     //v1 = swiz(v0, Y,X,1.0f);
     std::cout << "Original: " << v0 << std::endl;
     std::cout << "Swizzled: " << v1 << std::endl;
-    TUMBO_ASSERT( (v1 == fvec3{5,4,1}) );
+    ASSERT_EQ( v1, (fvec3{5,4,1}) );
     }
 
-int
-main( int argc, char* argv[] )
+TEST( Multiplication, Mat22 )
     {
-    using namespace tumbo;
     imat22 A{ 0,1,2,3 };
-    std::cout << A << std::endl;
-
-    // Multiplication
     auto A2 = A*A;
     imat22 A2_correct{ 2,3,6,11 };
-    TUMBO_ASSERT( A2 == A2_correct );
-
+    ASSERT_EQ( A2, A2_correct );
+    }
+/*
     // Submatrix
     auto v0 = fvec4{1,2,3,4};
     auto v1 = submatrix<3,1>(v0);
@@ -46,4 +88,4 @@ main( int argc, char* argv[] )
 
     std::cout << "Test finished." << std::endl;
     return 0;
-    }
+    }*/

@@ -423,9 +423,10 @@ namespace tumbo
 		{
 		if( M == 2 && N == 2 )
 			{
-			matrix<T,M,N> adj;
-			adj(0,0) = A(1,1);	adj(1,1) = A(0,0);
-			adj(0,1) = A(0,1);	adj(1,0) = A(1,0);
+			matrix<T,M,N> adj{
+                A(1,1), -A(0,1),
+                -A(1,0), A(0,0)
+                };
 			return adj;
 			}
 
