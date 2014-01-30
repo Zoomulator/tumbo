@@ -96,6 +96,9 @@ namespace lua
         div( lua_State* L );
 
         static int
+        inverse( lua_State* L );
+
+        static int
         mat_index( lua_State* L );
 
         static int
@@ -333,6 +336,26 @@ namespace lua
         return 1;
         }
 
+    template<class T> struct inverse_choice {
+        static T inv( const T& A )
+            { return T(A); }
+        };
+
+    template<class T, size_t M>
+    struct inverse_choice<matrix<T,M,M>>
+        {
+        static matrix<T,M,M> inv( const matrix<T,M,M>& A )
+            { return tumbo::inverse(A); }
+        };
+
+    template<class T> int
+    bind<T>::inverse( lua_State* L )
+        {
+        auto a = lua_check(L,1);
+        *push(L) = inverse_choice<T>::inv(*a);
+        return 1;
+        }
+
 
     template<class T> int
     bind<T>::mat_index( lua_State* L )
@@ -465,6 +488,7 @@ namespace lua
             };
         luaL_Reg meth[] =
             {
+            { "inverse", inverse },
             { NULL, NULL }
             };
         int metatable, methodtable;
