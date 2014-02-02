@@ -10,6 +10,10 @@
     \brief Contains various constructor functions for affine matrices.
 */
 
+#ifdef _WIN32
+#define static_assert(...)
+#endif
+
 namespace tumbo
     {
     template<typename matrix> matrix
@@ -93,7 +97,7 @@ namespace tumbo
         return R;
         }
 
-
+    #undef near
     template<class T> matrix<T,4,4>
     ortho(
         T left, T right,

@@ -5,6 +5,5 @@
 #include "utility.hpp"
 #include "cons.hpp"
 #include "types.hpp"
-#include "swizzling.hpp"
 
 #endif // TUMBO_TUMBO_HPP

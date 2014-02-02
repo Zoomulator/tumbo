@@ -9,6 +9,9 @@
 #include <cstring>
 #include "assert.hpp"
 
+#ifdef _WIN32
+#define constexpr
+#endif
 
 namespace tumbo
 	{
