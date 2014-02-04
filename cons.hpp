@@ -97,7 +97,7 @@ namespace tumbo
         return R;
         }
 
-    #undef near
+
     template<class T> matrix<T,4,4>
     ortho(
         T left, T right,
@@ -115,6 +115,21 @@ namespace tumbo
             0,       y_ortho, 0,       ty,
             0,       0,       z_ortho, tz,
             0,       0,       0,       1   };
+        }
+
+
+    template<class T> matrix<T,4,4>
+    perspective(T fov, T aspect, T near, T far )
+        {
+        auto f = 1 / std::tan( fov/2 );
+        auto depth = far - near;
+        return matrix<T,4,4>
+            {
+            f/aspect,  0,  0,  0,
+            0,         f,  0,  0,
+            0,         0,  -far/depth,  -far*near/depth,
+            0,         0,  -1,  0
+            };
         }
 
     } // namespace tumbo
