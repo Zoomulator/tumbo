@@ -79,6 +79,20 @@ namespace tumbo
         }
 
 
+    template<class T, size_t D> vec<T,D>
+    top( aabb<T,D> a )
+        {
+        return submatrix<D,1>( a );
+        }
+
+
+    template<class T, size_t D> vec<T,D>
+    bottom( aabb<T,D> a )
+        {
+        return submatrix<D,1>( a, 0,1 );
+        }
+
+
     /* Moves the aabb by delta amount. */
     template<class T,size_t D> aabb<T,D>
     translate( const aabb<T,D> a, const vec<T,D>& delta )
@@ -179,6 +193,38 @@ namespace tumbo
         }
 
 
+    /* Provided a list of points, generate an aabb. */
+    template<class T, size_t D, class Iter> aabb<T,D>
+    calculate_aabb( Iter it, Iter end )
+        {
+        if( it == end )
+            return uniform<aabb<T,D>>(0);
+
+        vec<T,D> min, max;
+        min = max = *it;
+        for( ; it != end; ++it )
+            {
+            const vec<T,D>& point = *it;
+            for( size_t i=0; i < D; ++i )
+                {
+                min[i] = std::min<T>( min[i], point[i] );
+                max[i] = std::max<T>( max[i], point[i] );
+                }
+            }
+        return weld( min, max );
+        }
+
+
+    template<class T, size_t D> aabb<T,D>
+    transform_aabb( const aabb<T,D>& box, const matrix<T,D+1,D+1>& mat )
+        {
+        auto vertices = corners( box );
+        for( auto& v : vertices )
+            v = submatrix<3,1>( mat * weldv(v,scalar<T>{1}) );
+        return calculate_aabb<float,3>( begin(vertices), end(vertices) );
+        }
+
+
     /* Splits an aabb into 2^D smaller aabbs. */
     template<class T, size_t D> aabb_list<T,D>
     split( const aabb<T,D>& a, const vec<T,D>& p )
@@ -226,6 +272,19 @@ namespace tumbo
         for( int d = 0; d < D; ++d )
             {
             result(d,0) = max( a(d,0), b(d,0) );
+            result(d,1) = min( a(d,1), b(d,1) );
+            }
+        return result;
+        }
+
+
+    template<class T, size_t D> aabb<T,D>
+    combine( const aabb<T,D>& a, const aabb<T,D>& b )
+        {
+        aabb<T,D> result;
+        for( size_t d=0; d<D; ++d )
+            {
+            result(d,0) = min( a(d,0), b(d,0) );
             result(d,1) = min( a(d,1), b(d,1) );
             }
         return result;
