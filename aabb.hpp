@@ -219,7 +219,7 @@ namespace tumbo
     template<class T, size_t D> aabb<T,D>
     intersect( const aabb<T,D>& a, const aabb<T,D>& b )
         {
-        auto result = aabb<T,D>::uniform(0);
+        auto result = uniform<aabb<T,D>>(0);
         if( !overlaps(a,b) )
             return result;
 

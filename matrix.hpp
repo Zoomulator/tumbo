@@ -35,8 +35,6 @@ namespace tumbo
 		public:
 			typedef T scalar_t;
 
-			static matrix uniform(scalar_t);
-
 			matrix() {}
             matrix( const matrix& );
             matrix( std::initializer_list<T> l );
