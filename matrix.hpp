@@ -9,6 +9,9 @@
 #include <cstring>
 #include "assert.hpp"
 
+#ifdef _WIN32
+#define constexpr
+#endif
 
 namespace tumbo
 	{
@@ -31,8 +34,6 @@ namespace tumbo
 		{
 		public:
 			typedef T scalar_t;
-
-			static matrix uniform(scalar_t);
 
 			matrix() {}
             matrix( const matrix& );
