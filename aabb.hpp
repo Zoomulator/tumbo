@@ -285,7 +285,7 @@ namespace tumbo
         for( size_t d=0; d<D; ++d )
             {
             result(d,0) = min( a(d,0), b(d,0) );
-            result(d,1) = min( a(d,1), b(d,1) );
+            result(d,1) = max( a(d,1), b(d,1) );
             }
         return result;
         }
