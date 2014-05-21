@@ -18,7 +18,7 @@ namespace tumbo
 
     typedef vec2<int> ivec2;
     typedef vec3<int> ivec3;
-    typedef vec3<int> ivec4;
+    typedef vec4<int> ivec4;
 
     typedef matrix<int, 2, 2> imat22;
     typedef matrix<int, 3, 3> imat33;
