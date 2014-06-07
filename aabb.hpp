@@ -82,14 +82,14 @@ namespace tumbo
     template<class T, size_t D> vec<T,D>
     top( aabb<T,D> a )
         {
-        return submatrix<D,1>( a );
+        return submatrix<D,1>( a, 0, 1 );
         }
 
 
     template<class T, size_t D> vec<T,D>
     bottom( aabb<T,D> a )
         {
-        return submatrix<D,1>( a, 0,1 );
+        return submatrix<D,1>( a );
         }
 
 
