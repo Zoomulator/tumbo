@@ -21,7 +21,7 @@
         if( !(x) ) throw std::logic_error( "Tumbo assertion failed: " #x );
 #endif // TUMBO_CASSERT
 #else
-    #define TUMBO_ASSERT (void(0))
+    #define TUMBO_ASSERT(x)
 #endif // NDEBUG
 
 #endif // TUMBO_ASSERT_HPP
