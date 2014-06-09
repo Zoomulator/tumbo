@@ -1,6 +1,7 @@
 #ifndef TUMBO_UTILITY_HPP
 #define TUMBO_UTILITY_HPP
 
+#include <utility>
 #include "matrix.hpp"
 #include "assert.hpp"
 
@@ -9,19 +10,6 @@
 namespace tumbo
 	{
     const double PI = 3.1415926535897932384626433832795028841971693993751058;
-
-    /// Cast a matrix to another equal sized matrix with different inner type.
-    template<class S, class T, size_t M, size_t N> matrix<S,M,N>
-    cast_matrix( const matrix<T,M,N>& A )
-        {
-        matrix<S,M,N> R;
-
-        for( size_t i=0; i < A.size(); ++i )
-            R[i] = static_cast<S>( A[i] );
-
-        return R;
-        }
-
 
     /// Returns a copy of the matrix transposed.
 	template< class T, size_t M, size_t N > matrix<T,N,M>
@@ -38,10 +26,12 @@ namespace tumbo
 
 
     /// Multiply matrix by scalar.
-	template< class T, size_t M, size_t N> matrix<T,M,N>
-	operator* ( T s, const matrix<T,M,N>& A )
+	template< class S, class T, size_t M, size_t N>
+    typename std::enable_if< std::is_arithmetic<S>::value,
+        matrix< decltype( std::declval<S>() * std::declval<T>() ), M, N > >::type
+	operator* ( S s, const matrix<T,M,N>& A )
 		{
-		matrix<T,M,N> R;
+		matrix< decltype( std::declval<S>() * std::declval<T>() ), M, N > R;
 		for( size_t i=0; i < A.size(); ++i )
 			R[i] = s * A[i];
 		return R;
@@ -49,10 +39,11 @@ namespace tumbo
 
 
     /// Matrix division by scalar.
-	template< class T, size_t M, size_t N> matrix<T,M,N>
-	operator/ (const matrix<T,M,N>& A, T s )
+	template< class T, class S, size_t M, size_t N >
+    matrix< decltype( std::declval<T>() / std::declval<S>() ), M, N >
+	operator/ (const matrix<T,M,N>& A, S s )
 		{
-		matrix<T,M,N> R;
+        matrix< decltype( std::declval<T>() / std::declval<S>() ), M, N > R;
 		for( size_t i=0; i < A.size(); ++i )
 			R[i] = A[i] / s;
 		return R;
@@ -94,15 +85,16 @@ namespace tumbo
 
 
     /// Dot product between two equal length vector matrices.
-	template< class T, size_t AM, size_t AN, size_t BM, size_t BN > T
-	dot( const matrix<T,AM,AN>& A, const matrix<T,BM,BN>& B )
+	template< class T, class S, size_t AM, size_t AN, size_t BM, size_t BN >
+    decltype( std::declval<T>() * std::declval<S>() )
+	dot( const matrix<T,AM,AN>& A, const matrix<S,BM,BN>& B )
 		{
 		static_assert( (AM == 1 || AN == 1) && (BM == 1 || BN == 1),
             "Input must be vectors." );
 		static_assert( AM*AN == BM*BN,
             "Vectors must be equal in length." );
 
-		T sum = 0;
+		decltype( std::declval<T>() * std::declval<S>() ) sum = 0;
 		for( size_t i=0; i < A.size(); ++i )
 			sum += A[i]*B[i];
 
@@ -148,7 +140,7 @@ namespace tumbo
 
 
     /// Returns the length, or magnitude, of a vector. Uses sqrt
-    template< class T, size_t M, size_t N > T
+    template< class T, size_t M, size_t N > decltype( sqrt( std::declval<T>() ) )
     length( const matrix<T,M,N>& A )
         {
 		return sqrt( length_sq(A) );
@@ -271,10 +263,11 @@ namespace tumbo
 
     /// Multiplication operator between two matrices.
     /** Matrix B must have the same height as A's width. */
-	template< class T, size_t M, size_t N, size_t P > matrix<T,M,P>
-	operator * ( const matrix<T,M,N>& A, const matrix<T,N,P>& B )
+	template< class T, class S, size_t M, size_t N, size_t P >
+    matrix< decltype( std::declval<T>() * std::declval<S>() ), M, P >
+	operator * ( const matrix<T,M,N>& A, const matrix<S,N,P>& B )
 		{
-		matrix<T,M,P> R;
+		matrix< decltype( std::declval<T>() * std::declval<S>() ), M, P > R;
 
 		for( size_t i=0; i<M; ++i )
 		for( size_t j=0; j<P; ++j )
@@ -296,10 +289,11 @@ namespace tumbo
 
 
     /// Element-wise addition of matrices.
-	template< class T, size_t M, size_t N > matrix<T,M,N>
-	operator + ( const matrix<T,M,N>& A, const matrix<T,M,N>& B )
+	template< class T, class S, size_t M, size_t N >
+    matrix< decltype( std::declval<T>() + std::declval<S>() ), M, N >
+	operator + ( const matrix<T,M,N>& A, const matrix<S,M,N>& B )
 		{
-		matrix<T,M,N> result;
+		matrix< decltype( std::declval<T>() + std::declval<S>() ), M, N > result;
 		for( size_t i=0; i < M*N; ++i )
 			result[i] = A[i] + B[i];
 
@@ -308,10 +302,11 @@ namespace tumbo
 
 
     /// Element-wise subtraction of matrices.
-	template< class T, size_t M, size_t N > matrix<T,M,N>
-	operator - ( const matrix<T,M,N>& A, const matrix<T,M,N>& B )
+	template< class T, class S, size_t M, size_t N >
+    matrix< decltype( std::declval<T>() + std::declval<S>() ), M, N >
+	operator - ( const matrix<T,M,N>& A, const matrix<S,M,N>& B )
 		{
-		matrix<T,M,N> result;
+        matrix< decltype( std::declval<T>() + std::declval<S>() ), M, N > result;
 		for( size_t i=0; i < M*N; ++i )
 			result[i] = A[i] - B[i];
 

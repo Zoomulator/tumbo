@@ -20,6 +20,12 @@ namespace tumbo
         enum cmp { X=0, Y, Z, W };
         }
 
+    template< class T, size_t M, size_t N >
+    class matrix;
+
+    template< class T, class S, size_t M, size_t N >
+    matrix<S,M,N> cast_matrix( const matrix<T,M,N>& );
+
 	/**
         \class matrix
         \brief Statically sized matrix type
@@ -86,11 +92,29 @@ namespace tumbo
 			static constexpr size_t
             width()
 				{ return N; }
+            /*
+            template<class S>
+            operator matrix<S,M,N> ()
+                {
+                return cast_matrix<S>(*this);
+                }
+            */
 
 		private:
 			scalar_t data_[ M*N ];
 		};
 
+    /// Cast a matrix to another equal sized matrix with different inner type.
+    template<class S, class T, size_t M, size_t N> matrix<S,M,N>
+    cast_matrix( const matrix<T,M,N>& A )
+        {
+        matrix<S,M,N> R;
+
+        for( size_t i=0; i < A.size(); ++i )
+            R[i] = static_cast<S>( A[i] );
+
+        return R;
+        }
 
     template< class T, size_t M, size_t N >
     matrix<T,M,N>::matrix( const matrix<T,M,N>& other )
