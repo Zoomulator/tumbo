@@ -147,6 +147,18 @@ namespace tumbo
 		}
 
 
+    template< class T, size_t M, size_t N >
+    matrix< decltype(length(std::declval<matrix<T,M,N>>())), M, N >
+    normalize( const matrix<T,M,N>& A,
+               decltype(length(std::declval<matrix<T,M,N>>()))* len = nullptr )
+        {
+        static_assert( M == 1 || N == 1,
+           "Can only normalize a vector" );
+        auto L = length( A );
+        if( len ) *len = L;
+        return A / L;
+        }
+
     /// Returns a copy of row i of matrix A as a vector matrix.
 	template< class T, size_t M, size_t N > matrix<T,1,N>
 	row( const matrix<T,M,N>& A, size_t i )
