@@ -99,7 +99,7 @@ namespace tumbo
 
 
     template<class T> matrix<T,4,4>
-    ortho(
+    orthographic(
         T left, T right,
         T bottom, T top,
         T near, T far )

@@ -159,6 +159,28 @@ namespace tumbo
         return A / L;
         }
 
+
+    // Reflect A over line L.
+    template< class T, size_t M, size_t N >
+    matrix< T, M, N >
+    reflect( const matrix<T,M,N>& A, const matrix<T,M,N>& L )
+        {
+        static_assert( M == 1 || N == 1, "Only vectors can be reflected." );
+        return 2 * dot(A,L) / length_sq(L) * L - A;
+        }
+
+
+    // Flip a 2D vector 90degrees
+    template< class T, size_t M, size_t N >
+    matrix< T, M, N >
+    orthogonal( const matrix<T,M,N>& A )
+        {
+        static_assert( ( M == 1 && N == 2 ) || ( M == 2 && N == 1 ),
+            "Only 2D vectors can be used with the orthogonal function." );
+        return { A[1], -A[0] };
+        }
+
+
     /// Returns a copy of row i of matrix A as a vector matrix.
 	template< class T, size_t M, size_t N > matrix<T,1,N>
 	row( const matrix<T,M,N>& A, size_t i )
