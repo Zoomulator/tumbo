@@ -298,10 +298,10 @@ namespace tumbo
     /// Multiplication operator between two matrices.
     /** Matrix B must have the same height as A's width. */
 	template< class T, class S, size_t M, size_t N, size_t P >
-    matrix< decltype( std::declval<T>() * std::declval<S>() ), M, P >
+    matrix< typename std::common_type<T,S>::type, M, P >
 	operator * ( const matrix<T,M,N>& A, const matrix<S,N,P>& B )
 		{
-		matrix< decltype( std::declval<T>() * std::declval<S>() ), M, P > R;
+		matrix< typename std::common_type<T,S>::type, M, P > R;
 
 		for( size_t i=0; i<M; ++i )
 		for( size_t j=0; j<P; ++j )
