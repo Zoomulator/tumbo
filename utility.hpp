@@ -28,22 +28,32 @@ namespace tumbo
     /// Multiply matrix by scalar.
     template< class S, class T, size_t M, size_t N>
     typename std::enable_if< std::is_arithmetic<S>::value,
-        matrix< decltype( std::declval<S>() * std::declval<T>() ), M, N > >::type
+        matrix< typename std::common_type<T,S>::type, M, N > >::type
     operator* ( S s, const matrix<T,M,N>& A )
         {
-        matrix< decltype( std::declval<S>() * std::declval<T>() ), M, N > R;
+        matrix< typename std::common_type<T,S>::type, M, N > R;
         for( size_t i=0; i < A.size(); ++i )
             R[i] = s * A[i];
         return R;
+        }
+        
+        
+    /// Scalar multiplication is associative.
+    template< class T, class S, size_t M, size_t N >
+    typename std::enable_if< std::is_arithmetic<S>::value,
+        matrix< typename std::common_type<T,S>::type, M, N > >::type
+    operator* ( const matrix<T,M,N>& A, S s )
+        {
+        return s * A;
         }
 
 
     /// Matrix division by scalar.
     template< class T, class S, size_t M, size_t N >
-    matrix< decltype( std::declval<T>() / std::declval<S>() ), M, N >
+    matrix< typename std::common_type<S,T>::type, M, N >
     operator/ (const matrix<T,M,N>& A, S s )
         {
-        matrix< decltype( std::declval<T>() / std::declval<S>() ), M, N > R;
+        matrix< typename std::common_type<S,T>::type, M, N > R;
         for( size_t i=0; i < A.size(); ++i )
             R[i] = A[i] / s;
         return R;
@@ -86,7 +96,7 @@ namespace tumbo
 
     /// Dot product between two equal length vector matrices.
     template< class T, class S, size_t AM, size_t AN, size_t BM, size_t BN >
-    decltype( std::declval<T>() * std::declval<S>() )
+    typename std::common_type<T,S>::type
     dot( const matrix<T,AM,AN>& A, const matrix<S,BM,BN>& B )
         {
         static_assert( (AM == 1 || AN == 1) && (BM == 1 || BN == 1),
@@ -94,7 +104,7 @@ namespace tumbo
         static_assert( AM*AN == BM*BN,
             "Vectors must be equal in length." );
 
-        decltype( std::declval<T>() * std::declval<S>() ) sum = 0;
+        typename std::common_type<T,S>::type sum = 0;
         for( size_t i=0; i < A.size(); ++i )
             sum += A[i]*B[i];
 
@@ -126,7 +136,8 @@ namespace tumbo
         This function lets you avoid the indirect use of sqrt when using
         the standard length function.
     */
-    template< class T, size_t M, size_t N > T
+    template< class T, size_t M, size_t N >
+    T
     length_sq( const matrix<T,M,N>& A )
         {
         static_assert( M == 1 || N == 1,
@@ -140,7 +151,8 @@ namespace tumbo
 
 
     /// Returns the length, or magnitude, of a vector. Uses sqrt
-    template< class T, size_t M, size_t N > decltype( sqrt( std::declval<T>() ) )
+    template< class T, size_t M, size_t N >
+    decltype( sqrt( std::declval<T>() ) )
     length( const matrix<T,M,N>& A )
         {
         return sqrt( length_sq(A) );
@@ -324,10 +336,10 @@ namespace tumbo
 
     /// Element-wise addition of matrices.
     template< class T, class S, size_t M, size_t N >
-    matrix< decltype( std::declval<T>() + std::declval<S>() ), M, N >
+    matrix< typename std::common_type<T,S>::type, M, N >
     operator + ( const matrix<T,M,N>& A, const matrix<S,M,N>& B )
         {
-        matrix< decltype( std::declval<T>() + std::declval<S>() ), M, N > result;
+        matrix< typename std::common_type<T,S>::type, M, N > result;
         for( size_t i=0; i < M*N; ++i )
             result[i] = A[i] + B[i];
 
@@ -337,10 +349,10 @@ namespace tumbo
 
     /// Element-wise subtraction of matrices.
     template< class T, class S, size_t M, size_t N >
-    matrix< decltype( std::declval<T>() + std::declval<S>() ), M, N >
+    matrix< typename std::common_type<T,S>::type, M, N >
     operator - ( const matrix<T,M,N>& A, const matrix<S,M,N>& B )
         {
-        matrix< decltype( std::declval<T>() + std::declval<S>() ), M, N > result;
+        matrix< typename std::common_type<T,S>::type, M, N > result;
         for( size_t i=0; i < M*N; ++i )
             result[i] = A[i] - B[i];
 
