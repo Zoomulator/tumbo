@@ -14,7 +14,7 @@
 #endif
 
 namespace tumbo
-	{
+    {
     namespace components
         {
         enum cmp { X=0, Y, Z, W };
@@ -26,7 +26,7 @@ namespace tumbo
     template< class T, class S, size_t M, size_t N >
     matrix<S,M,N> cast_matrix( const matrix<T,M,N>& );
 
-	/**
+    /**
         \class matrix
         \brief Statically sized matrix type
 
@@ -34,14 +34,14 @@ namespace tumbo
         in a row major order.
 
         Convinient typedefs such as mat44 and vec3 are defined in tumbo.hpp
-	*/
-	template < class T, size_t M, size_t N >
-	class matrix
-		{
-		public:
-			typedef T scalar_t;
+    */
+    template < class T, size_t M, size_t N >
+    class matrix
+        {
+        public:
+            typedef T scalar_t;
 
-			matrix() {}
+            matrix() {}
             matrix( const matrix& );
             matrix( std::initializer_list<T> l );
 
@@ -54,44 +54,44 @@ namespace tumbo
             matrix&
             operator = ( const matrix& );
 
-			scalar_t&
+            scalar_t&
             operator() ( size_t i, size_t j );
 
-			const scalar_t&
+            const scalar_t&
             operator() ( size_t i, size_t j ) const;
 
-			scalar_t&
+            scalar_t&
             operator[] ( size_t i );
 
-			const scalar_t&
+            const scalar_t&
             operator[] ( size_t i ) const;
 
-			const scalar_t*
+            const scalar_t*
             data() const;
 
-			scalar_t*
+            scalar_t*
             begin();
 
-			const scalar_t*
+            const scalar_t*
             begin() const;
 
-			scalar_t*
+            scalar_t*
             end();
 
-			const scalar_t*
+            const scalar_t*
             end() const;
 
-			static constexpr size_t
+            static constexpr size_t
             size()
-				{ return M*N; }
+                { return M*N; }
 
-			static constexpr size_t
+            static constexpr size_t
             height()
-				{ return M; }
+                { return M; }
 
-			static constexpr size_t
+            static constexpr size_t
             width()
-				{ return N; }
+                { return N; }
             /*
             template<class S>
             operator matrix<S,M,N> ()
@@ -100,9 +100,9 @@ namespace tumbo
                 }
             */
 
-		private:
-			scalar_t data_[ M*N ];
-		};
+        private:
+            scalar_t data_[ M*N ];
+        };
 
     /// Cast a matrix to another equal sized matrix with different inner type.
     template<class S, class T, size_t M, size_t N> matrix<S,M,N>
@@ -243,6 +243,6 @@ namespace tumbo
         return data_+size();
         }
 
-	} // namespace tumbo
+    } // namespace tumbo
 
 #endif //TUMBO_MATRIX_HPP

@@ -21,22 +21,22 @@ namespace tumbo
         {
         static_assert( matrix::width() == matrix::height(),
             "Only square matrix types has identity." );
-		matrix A;
-		for( size_t i=0; i<matrix::size(); ++i )
-			A[i] = static_cast<typename matrix::scalar_t>(
+        matrix A;
+        for( size_t i=0; i<matrix::size(); ++i )
+            A[i] = static_cast<typename matrix::scalar_t>(
                 i % (matrix::width()+1) == 0 ? 1 : 0);
-		return A;
+        return A;
         }
 
 
-	template<typename matrix> matrix
-	uniform(typename matrix::scalar_t s)
-		{
-		matrix A;
-		for( size_t i=0; i<matrix::size(); ++i )
-			A[i] = s;
-		return A;
-		}
+    template<typename matrix> matrix
+    uniform(typename matrix::scalar_t s)
+        {
+        matrix A;
+        for( size_t i=0; i<matrix::size(); ++i )
+            A[i] = s;
+        return A;
+        }
 
 
     template<class T, size_t D> matrix<T,D+1,D+1>
@@ -48,44 +48,44 @@ namespace tumbo
         }
 
 
-	/// Contructor for an affine 3D rotation matrix.
-	template<class T> matrix<T,4,4>
-	rotation( T rad, T x, T y, T z )
-		{
-		T mag = T( std::sqrt( x*x + y*y + z*z ) );
-		if( mag == 0.0f )
-			return identity<matrix<T,4,4>>();
+    /// Contructor for an affine 3D rotation matrix.
+    template<class T> matrix<T,4,4>
+    rotation( T rad, T x, T y, T z )
+        {
+        T mag = T( std::sqrt( x*x + y*y + z*z ) );
+        if( mag == 0.0f )
+            return identity<matrix<T,4,4>>();
 
-		x /= mag; y /= mag; z /= mag;
+        x /= mag; y /= mag; z /= mag;
 
-		T s = std::sin(rad);
-		T c = std::cos(rad);
-		T one_c = 1.0f - c;
+        T s = std::sin(rad);
+        T c = std::cos(rad);
+        T one_c = 1.0f - c;
 
-		const T data[16] =
-			{
-			(one_c *x*x) + c,	(one_c *x*y) + z*s, (one_c *z*x) - y*s,		0,
-			(one_c *x*y) - z*s,	(one_c *y*y) + c,	(one_c *y*z) + x*s,		0,
-			(one_c *z*x) + y*s,	(one_c *y*z) -x*s,	(one_c *z*z) + c,		0,
-			0,					0,					0,						1 };
+        const T data[16] =
+            {
+            (one_c *x*x) + c,    (one_c *x*y) + z*s, (one_c *z*x) - y*s,        0,
+            (one_c *x*y) - z*s,    (one_c *y*y) + c,    (one_c *y*z) + x*s,        0,
+            (one_c *z*x) + y*s,    (one_c *y*z) -x*s,    (one_c *z*z) + c,        0,
+            0,                    0,                    0,                        1 };
 
-		matrix<T,4,4> R;
-		R.assign( data, data+16 );
-		return R;
-		}
+        matrix<T,4,4> R;
+        R.assign( data, data+16 );
+        return R;
+        }
 
 
-	/// Contructor for an affine 2D rotation matrix.
-	template<class T> matrix<T,3,3>
-	rotation( T rad )
-		{
-		matrix<T,3,3> R = identity<matrix<T,3,3>>();
-		R(0,0) = std::cos(rad);
-		R(1,0) = std::sin(rad);
-		R(0,1) = -R(1,0);
-		R(1,1) = R(0,0);
-		return R;
-		}
+    /// Contructor for an affine 2D rotation matrix.
+    template<class T> matrix<T,3,3>
+    rotation( T rad )
+        {
+        matrix<T,3,3> R = identity<matrix<T,3,3>>();
+        R(0,0) = std::cos(rad);
+        R(1,0) = std::sin(rad);
+        R(0,1) = -R(1,0);
+        R(1,1) = R(0,0);
+        return R;
+        }
 
 
     template<class T, size_t D> matrix<T,D+1,D+1>
