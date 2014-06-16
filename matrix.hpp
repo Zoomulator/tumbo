@@ -43,6 +43,10 @@ namespace tumbo
 
             matrix() {}
             matrix( const matrix& );
+
+            template< class S > explicit
+            matrix( const matrix<S,M,N>& );
+
             matrix( std::initializer_list<T> l );
 
             template<class Iter>
@@ -92,13 +96,6 @@ namespace tumbo
             static constexpr size_t
             width()
                 { return N; }
-            /*
-            template<class S>
-            operator matrix<S,M,N> ()
-                {
-                return cast_matrix<S>(*this);
-                }
-            */
 
         private:
             scalar_t data_[ M*N ];
@@ -108,18 +105,23 @@ namespace tumbo
     template<class S, class T, size_t M, size_t N> matrix<S,M,N>
     cast_matrix( const matrix<T,M,N>& A )
         {
-        matrix<S,M,N> R;
-
-        for( size_t i=0; i < A.size(); ++i )
-            R[i] = static_cast<S>( A[i] );
-
-        return R;
+        return matrix<S,M,N>(A);
         }
+
 
     template< class T, size_t M, size_t N >
     matrix<T,M,N>::matrix( const matrix<T,M,N>& other )
         {
         std::memcpy( this, &other, sizeof(matrix<T,M,N>) );
+        }
+
+
+    template< class T, size_t M, size_t N >
+    template< class S >
+    matrix<T,M,N>::matrix( const matrix<S,M,N>& other )
+        {
+        for( size_t i=0; i < other.size(); ++i )
+            data_[i] = static_cast<T>( other[i] );
         }
 
 
