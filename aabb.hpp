@@ -35,7 +35,7 @@ namespace tumbo
     contains( aabb<T,D> a, vec<T,D> p )
         {
         for( size_t d=0; d < D; ++d )
-            if( p[d] < a(d,0) || a(d,1) <= p[d] )
+            if( p[d] < a(d,0) || a(d,1) < p[d] )
                 return false;
         return true;
         }
