@@ -182,14 +182,16 @@ namespace tumbo
         }
 
 
-    // Flip a 2D vector 90degrees
+    // Flip a 2D vector 90degrees.
+    // This would be CCW on a right handed coordinate system and
+    // CW on a left handed system
     template< class T, size_t M, size_t N >
     matrix< T, M, N >
     orthogonal( const matrix<T,M,N>& A )
         {
         static_assert( ( M == 1 && N == 2 ) || ( M == 2 && N == 1 ),
             "Only 2D vectors can be used with the orthogonal function." );
-        return { A[1], -A[0] };
+        return { -A[1], A[0] };
         }
 
 
