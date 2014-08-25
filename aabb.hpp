@@ -163,6 +163,15 @@ namespace tumbo
         }
 
 
+    template<class T, size_t D> bool
+    is_point( const aabb<T,D>& a )
+        {
+        for( size_t d=0; d<D; ++d )
+            if( a(d,0) != a(d,1) ) return false;
+        return true;
+        }
+
+
 
     /* Convert rect type {x,y,w,h} to aabb. */
     template<class T, size_t D, class R> aabb<T,D>
