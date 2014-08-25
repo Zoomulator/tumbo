@@ -300,6 +300,22 @@ namespace tumbo
         }
 
 
+    /* Requires two random access iterators. */
+    template<class T, size_t D, class Iter> aabb<T,D>
+    combine( Iter it, Iter end )
+        {
+        if( it == end )
+            return uniform<aabb<T,D>>( 0 );
+
+        aabb<T,D> box = *it++;
+
+        while( it != end )
+            box = combine( box, *it++ );
+
+        return box;
+        }
+
+
     } // namespace tumbo
 
 #endif // TUMBO_AABB_HPP
