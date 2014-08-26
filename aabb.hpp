@@ -227,6 +227,7 @@ namespace tumbo
     template<class T, size_t D> aabb<T,D>
     transform_aabb( const aabb<T,D>& box, const matrix<T,D+1,D+1>& mat )
         {
+        // http://www.gamedev.net/topic/347234-quickest-way-to-compute-a-new-aabb-from-an-aabb--transform/
         auto vertices = corners( box );
         for( auto& v : vertices )
             v = submatrix<3,1>( mat * weldv(v,scalar<T>{1}) );
@@ -313,6 +314,29 @@ namespace tumbo
             box = combine( box, *it++ );
 
         return box;
+        }
+
+
+    /* Combines all overlapping boxes in place. */
+    template<class Iter> Iter
+    combine_overlapping( Iter it, Iter end )
+        {
+        while( it != end )
+            {
+            auto it2 = it+1;
+            while( it2 != end )
+                {
+                if( overlaps( *it, *it2 ) )
+                    {
+                    *it = combine( *it, *it2 );
+                    --end;
+                    *it2 = *end;
+                    }
+                else ++it2;
+                }
+            ++it;
+            }
+        return end;
         }
 
 
