@@ -1,4 +1,5 @@
 #include "tumbo.hpp"
+#include "swizzling.hpp"
 #include "io.hpp"
 
 #include <gtest/gtest.h>
