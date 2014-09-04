@@ -132,6 +132,30 @@ namespace tumbo
             };
         }
 
+
+    /* Calculates a transform with position at eye_position, pointing its
+        Z-axis towards the target point.
+        If the eye_position should be in world coordinates. To get the
+        correct local transform you just do:
+            inverse( parent_world_transform ) * look_at( [...] ) */
+    template<class T> matrix<T,4,4>
+    look_at(
+        const matrix<T,3,1> eye_position,
+        const matrix<T,3,1> target,
+        const matrix<T,3,1> aprox_up )
+        {
+        using namespace tumbo;
+        matrix<T,3,1> forward = normalize( target - eye_position );
+        matrix<T,3,1> right   = normalize( cross( forward, aprox_up ) );
+        matrix<T,3,1> up      = normalize( cross( right, forward ) );
+
+        /* Weld together the three vectors, resulting in the rotation. */
+        auto m0 = weld( right, weld( up, weld( -forward, eye_position) ) );
+        /* Fill in the bottom row. */
+        auto m1 = weldv( m0, transpose( matrix<T,4,1>{0,0,0,1} ) );
+        return m1;
+        }
+
     } // namespace tumbo
 
 #endif // TUMBO_CONS_HPP
