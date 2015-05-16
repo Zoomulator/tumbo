@@ -118,6 +118,21 @@ namespace tumbo
         }
 
 
+    // Near and far are entered as positive values.
+    template<class T> matrix<T,4,4>
+    perspective(
+        T l, T r,       /* left, right */
+        T b, T t,       /* bottom, top */
+        T n, T f )      /* near, far */
+        {
+        return {
+            2*n/(r-l),  0,          (r+l)/(r-l),            0,
+            0,          2*n/(t-b),  (t+b)/(t-b),            0,
+            0,          0,          -(f+n)/(f-n),           -2*f*n/(f-n),
+            0,          0,          -1,                     0 };
+        }
+
+
     template<class T> matrix<T,4,4>
     perspective(T fov, T aspect, T near, T far )
         {
