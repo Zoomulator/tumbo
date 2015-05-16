@@ -152,10 +152,10 @@ namespace tumbo
 
     /// Returns the length, or magnitude, of a vector. Uses sqrt
     template< class T, size_t M, size_t N >
-    decltype( sqrt( std::declval<T>() ) )
+    decltype( std::sqrt( std::declval<T>() ) )
     length( const matrix<T,M,N>& A )
         {
-        return sqrt( length_sq(A) );
+        return std::sqrt( length_sq(A) );
         }
 
 
