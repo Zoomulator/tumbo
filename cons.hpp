@@ -109,7 +109,7 @@ namespace tumbo
         T z_ortho = T(-2) / (far - near);
         T tx = -(right + left) / (right - left);
         T ty = -(top + bottom) / (top - bottom);
-        T tz = -(far + near)   / (far - near);
+        T tz = (far + near)   / (far - near);
         return matrix<T,4,4>{
             x_ortho, 0,       0,       tx,
             0,       y_ortho, 0,       ty,
